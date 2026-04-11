@@ -15,7 +15,6 @@ import (
 // @contact.name   Piyadanai Krongklang
 // @contact.url    https://github.com/Piyadanai03
 
-// @host      localhost:8080
 // @BasePath  /api/v1
 
 // @securityDefinitions.apikey BearerAuth
