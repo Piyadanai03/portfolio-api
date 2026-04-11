@@ -1,0 +1,341 @@
+basePath: /api/v1
+definitions:
+  models.Experience:
+    properties:
+      company:
+        type: string
+      description:
+        type: string
+      endDate:
+        description: ใช้ pointer เพื่อให้เป็น NULL ได้กรณีปัจจุบันยังทำอยู่
+        type: string
+      id:
+        type: string
+      jobTitle:
+        type: string
+      startDate:
+        type: string
+      userID:
+        type: string
+    type: object
+  models.Project:
+    properties:
+      coverImageURL:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      githubURL:
+        type: string
+      id:
+        type: string
+      images:
+        description: Relationships
+        items:
+          $ref: '#/definitions/models.ProjectImage'
+        type: array
+      technologies:
+        items:
+          $ref: '#/definitions/models.Technology'
+        type: array
+      title:
+        type: string
+      userID:
+        type: string
+    type: object
+  models.ProjectImage:
+    properties:
+      caption:
+        type: string
+      id:
+        type: string
+      imageURL:
+        type: string
+      projectID:
+        type: string
+    type: object
+  models.Study:
+    properties:
+      degree:
+        type: string
+      graduationDate:
+        type: string
+      id:
+        type: string
+      institution:
+        type: string
+      major:
+        type: string
+      userID:
+        type: string
+    type: object
+  models.Technology:
+    properties:
+      category:
+        description: Backend, Frontend, AI, etc.
+        type: string
+      iconURL:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: Piyadanai Krongklang
+    url: https://github.com/Piyadanai03
+  description: นี่คือระบบ Backend สำหรับ Portfolio ของคุณปิยดนัย
+  termsOfService: http://swagger.io/terms/
+  title: Piyadanai Portfolio API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: ตรวจสอบ Username/Password และคืนค่า JWT Token
+      parameters:
+      - description: ข้อมูล Login (username, password)
+        in: body
+        name: input
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: เข้าสู่ระบบ (Admin)
+      tags:
+      - Authentication
+  /member/education:
+    post:
+      consumes:
+      - application/json
+      description: บันทึกข้อมูลการศึกษาใหม่ (ต้อง Login)
+      parameters:
+      - description: ข้อมูลการศึกษา
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.Study'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Study'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: เพิ่มข้อมูลการศึกษา
+      tags:
+      - Education
+  /member/education/{id}:
+    delete:
+      description: ลบข้อมูลการศึกษาตาม ID (ต้อง Login)
+      parameters:
+      - description: ID ของการศึกษา
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: ลบข้อมูลการศึกษา
+      tags:
+      - Education
+  /member/experience:
+    post:
+      consumes:
+      - application/json
+      description: บันทึกข้อมูลประสบการณ์ทำงานใหม่ (ต้อง Login)
+      parameters:
+      - description: ข้อมูลประสบการณ์ทำงาน
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.Experience'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Experience'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: เพิ่มข้อมูลประสบการณ์ทำงาน
+      tags:
+      - Experience
+  /member/experience/{id}:
+    delete:
+      description: ลบข้อมูลประสบการณ์ทำงานตาม ID (ต้อง Login)
+      parameters:
+      - description: ID ของประสบการณ์ทำงาน
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: ลบข้อมูลประสบการณ์ทำงาน
+      tags:
+      - Experience
+  /member/projects:
+    post:
+      consumes:
+      - application/json
+      description: บันทึกข้อมูลโปรเจกต์ใหม่ (ต้อง Login)
+      parameters:
+      - description: ข้อมูลโปรเจกต์
+        in: body
+        name: input
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: เพิ่มข้อมูลโปรเจกต์
+      tags:
+      - Projects
+  /member/projects/{id}:
+    delete:
+      description: ลบข้อมูลโปรเจกต์ตาม ID (ต้อง Login)
+      parameters:
+      - description: ID ของโปรเจกต์
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: ลบข้อมูลโปรเจกต์
+      tags:
+      - Projects
+    put:
+      consumes:
+      - application/json
+      description: แก้ไขข้อมูลโปรเจกต์ตาม ID (ต้อง Login)
+      parameters:
+      - description: ID ของโปรเจกต์
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ข้อมูลโปรเจกต์ที่ต้องการแก้ไข
+        in: body
+        name: input
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: อัปเดตข้อมูลโปรเจกต์
+      tags:
+      - Projects
+  /projects:
+    get:
+      description: แสดงรายชื่อโปรเจกต์พร้อมรูปภาพประกอบสำหรับหน้าเว็บทั่วไป
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Project'
+            type: array
+      summary: ดึงข้อมูลโปรเจกต์ทั้งหมด
+      tags:
+      - Projects
+securityDefinitions:
+  BearerAuth:
+    description: ใส่คำว่า "Bearer " ตามด้วย Token ของคุณ
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
