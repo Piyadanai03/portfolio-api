@@ -12,6 +12,7 @@ type User struct {
 	Username        string    `gorm:"unique;not null"`
 	PasswordHash    string    `gorm:"not null"`
 	FullName        string
+	Position        string
 	BioText         string
 	Address         string
 	ProfileImageURL string
@@ -72,6 +73,7 @@ type Study struct {
 	Degree         string
 	Major          string
 	Institution    string
+	GPA            float64
 	GraduationDate time.Time
 }
 
