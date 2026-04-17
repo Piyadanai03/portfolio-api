@@ -1,9 +1,9 @@
 package models
 
 import (
-	"time"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"time"
 )
 
 // 1. ตาราง users (Admin & Profile)
@@ -73,7 +73,6 @@ type Study struct {
 	Degree         string
 	Major          string
 	Institution    string
-	GPA            float64
 	GraduationDate time.Time
 }
 
@@ -89,8 +88,8 @@ type Contact struct {
 
 // 8. ตาราง achievements
 type Achievement struct {
-	ID           uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	UserID       uuid.UUID `gorm:"type:uuid;not null"`
+	ID           uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	UserID       uuid.UUID  `gorm:"type:uuid;not null"`
 	ProjectID    *uuid.UUID `gorm:"type:uuid"` // เชื่อมโปรเจกต์ (ถ้ามี)
 	Title        string
 	Category     string // award หรือ training
