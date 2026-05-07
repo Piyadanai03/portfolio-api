@@ -8,21 +8,22 @@ import (
 
 // 1. ตาราง users (Admin & Profile)
 type User struct {
-	ID              uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	Username        string    `gorm:"unique;not null"`
-	PasswordHash    string    `gorm:"not null"`
-	FullName        string
-	Position        string
-	BioText         string
-	Address         string
-	ProfileImageURL string
-	ResumeURL       string
-	CreatedAt       time.Time
+	ID              uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	Username        string    `gorm:"unique;not null" json:"username"`
+	PasswordHash    string    `gorm:"not null" json:"-"`
+	FullName        string    `json:"fullName"`
+	Position        string    `json:"position"`
+	BioText         string    `json:"bioText"`
+	Address         string    `json:"address"`
+	ProfileImageURL string    `json:"profileImageURL"`
+	ResumeURL       string    `json:"resumeURL"`
+	CreatedAt       time.Time `json:"createdAt"`
+	
 	// Relationships
-	Projects    []Project    `gorm:"foreignKey:UserID"`
-	Experiences []Experience `gorm:"foreignKey:UserID"`
-	Studies     []Study      `gorm:"foreignKey:UserID"`
-	Contacts    []Contact    `gorm:"foreignKey:UserID"`
+	Projects    []Project    `gorm:"foreignKey:UserID" json:"projects,omitempty"`
+	Experiences []Experience `gorm:"foreignKey:UserID" json:"experiences,omitempty"`
+	Studies     []Study      `gorm:"foreignKey:UserID" json:"studies,omitempty"`
+	Contacts    []Contact    `gorm:"foreignKey:UserID" json:"contacts"`
 }
 
 // 2. ตาราง projects
@@ -78,12 +79,12 @@ type Study struct {
 
 // 7. ตาราง contact_info
 type Contact struct {
-	ID           uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	UserID       uuid.UUID `gorm:"type:uuid;not null"`
-	PlatformName string
-	URLValue     string
-	IconURL      string
-	IsActive     bool `gorm:"default:true"`
+	ID           uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id,omitempty"`
+	UserID       uuid.UUID `gorm:"type:uuid;not null" json:"userID"`
+	PlatformName string    `json:"platformName"`
+	URLValue     string    `json:"urlValue"`
+	IconURL      string    `json:"iconURL"`
+	IsActive     bool      `gorm:"default:true" json:"isActive"`
 }
 
 // 8. ตาราง achievements

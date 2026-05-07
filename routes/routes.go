@@ -5,6 +5,7 @@ import (
 	"github.com/Piyadanai03/portfolio-api/controllers/education"
 	"github.com/Piyadanai03/portfolio-api/controllers/experience"
 	"github.com/Piyadanai03/portfolio-api/controllers/projects"
+	"github.com/Piyadanai03/portfolio-api/controllers/profile"
 	_ "github.com/Piyadanai03/portfolio-api/docs"
 	"github.com/Piyadanai03/portfolio-api/middleware"
 	"github.com/gin-contrib/cors"
@@ -56,6 +57,9 @@ func SetupRouter() *gin.Engine {
 		member.DELETE("/education/:id", education.DeleteEducation)
 		member.POST("/experience", experience.CreateExperience)
 		member.DELETE("/experience/:id", experience.DeleteExperience)
+		member.GET("/profile", profile.GetProfile)
+		member.PUT("/profile", profile.UpdateProfile)
+
 
 	}
 
