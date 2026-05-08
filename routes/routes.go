@@ -6,6 +6,7 @@ import (
 	"github.com/Piyadanai03/portfolio-api/controllers/experience"
 	"github.com/Piyadanai03/portfolio-api/controllers/projects"
 	"github.com/Piyadanai03/portfolio-api/controllers/profile"
+	"github.com/Piyadanai03/portfolio-api/controllers/portfolio"
 	_ "github.com/Piyadanai03/portfolio-api/docs"
 	"github.com/Piyadanai03/portfolio-api/middleware"
 	"github.com/gin-contrib/cors"
@@ -38,6 +39,7 @@ func SetupRouter() *gin.Engine {
 	v1 := r.Group("/api/v1")
 
 	v1.GET("/projects", projects.GetProjects)
+	v1.GET("/home", portfolio.GetHomeData)
 	v1.POST("/login", auth.Login)
 
 	admin := v1.Group("/admin")

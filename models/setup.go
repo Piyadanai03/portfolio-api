@@ -84,7 +84,7 @@ type Contact struct {
 	PlatformName string    `json:"platformName"`
 	URLValue     string    `json:"urlValue"`
 	IconURL      string    `json:"iconURL"`
-	IsActive     bool      `gorm:"default:true" json:"isActive"`
+	IsActive     *bool      `gorm:"default:true" json:"isActive"`
 }
 
 // 8. ตาราง achievements

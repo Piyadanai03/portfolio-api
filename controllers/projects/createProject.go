@@ -2,48 +2,68 @@ package projects
 
 import (
 	"net/http"
-	"github.com/gin-gonic/gin"
+
 	"github.com/Piyadanai03/portfolio-api/config"
 	"github.com/Piyadanai03/portfolio-api/models"
+	"github.com/Piyadanai03/portfolio-api/utils" // 🌟 Import โฟลเดอร์ utils
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 // CreateProject godoc
 // @Summary      เพิ่มข้อมูลโปรเจกต์
-// @Description  บันทึกข้อมูลโปรเจกต์ใหม่ (ต้อง Login)
+// @Description  บันทึกข้อมูลโปรเจกต์ใหม่พร้อมอัปโหลดรูปภาพ (ต้อง Login)
 // @Tags         Projects
-// @Accept       json
+// @Accept       multipart/form-data
 // @Produce      json
-// @Param        input  body  object  true  "ข้อมูลโปรเจกต์"
+// @Param        title        formData string true  "ชื่อโปรเจกต์"
+// @Param        description  formData string false "รายละเอียดโปรเจกต์"
+// @Param        github_url   formData string false "ลิงก์ Github"
+// @Param        cover_image  formData file   false "รูปภาพหน้าปกโปรเจกต์"
 // @Success      201    {object}  map[string]interface{}
 // @Failure      400    {object}  map[string]interface{}
 // @Router       /member/projects [post]
 // @Security     BearerAuth
 func CreateProject(c *gin.Context) {
-	var input struct {
-		Title         string `json:"title" binding:"required"`
-		Description   string `json:"description"`
-		CoverImageURL string `json:"cover_image_url"`
-		GithubURL     string `json:"github_url"`
-	}
+	// 1. รับข้อมูลจาก Form-Data
+	title := c.PostForm("title")
+	description := c.PostForm("description")
+	githubURL := c.PostForm("github_url")
 
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if title == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "กรุณาระบุชื่อโปรเจกต์ (title)"})
 		return
 	}
 
-	// ดึง User ID จาก Middleware (ที่ยามฝากไว้ใน Context)
-	userID, _ := c.Get("user_id")
-	
-	// แปลง Interface เป็น uuid.UUID
+	// 2. จัดการอัปโหลดรูปภาพหน้าปก (ถ้ามี)
+	var coverImageURL string
+	file, _, err := c.Request.FormFile("cover_image")
+	if err == nil {
+		defer file.Close()
+		// 🌟 เรียกใช้ฟังก์ชันจาก utils
+		uploadedURL, uploadErr := utils.UploadToCloudinary(file, "portfolio_projects")
+		if uploadErr != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "อัปโหลดรูปหน้าปกล้มเหลว: " + uploadErr.Error()})
+			return
+		}
+		coverImageURL = uploadedURL
+	}
+
+	// 3. ดึง User ID จาก Token
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "ไม่พบข้อมูลยืนยันตัวตน"})
+		return
+	}
 	uID, _ := uuid.Parse(userID.(string))
 
+	// 4. บันทึกลงฐานข้อมูล
 	project := models.Project{
 		UserID:        uID,
-		Title:         input.Title,
-		Description:   input.Description,
-		CoverImageURL: input.CoverImageURL,
-		GithubURL:     input.GithubURL,
+		Title:         title,
+		Description:   description,
+		CoverImageURL: coverImageURL,
+		GithubURL:     githubURL,
 	}
 
 	if err := config.DB.Create(&project).Error; err != nil {
