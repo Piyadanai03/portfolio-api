@@ -5,71 +5,90 @@ import (
 
 	"github.com/Piyadanai03/portfolio-api/config"
 	"github.com/Piyadanai03/portfolio-api/models"
-	"github.com/Piyadanai03/portfolio-api/utils" // 🌟 Import โฟลเดอร์ utils
+	"github.com/Piyadanai03/portfolio-api/utils"
 	"github.com/gin-gonic/gin"
 )
 
-// UpdateProject godoc
-// @Summary      อัปเดตข้อมูลโปรเจกต์
-// @Description  แก้ไขข้อมูลโปรเจกต์ตาม ID (ต้อง Login)
-// @Tags         Projects
-// @Accept       multipart/form-data
-// @Produce      json
-// @Param        id           path     string true  "ID ของโปรเจกต์"
-// @Param        title        formData string false "ชื่อโปรเจกต์"
-// @Param        description  formData string false "รายละเอียดโปรเจกต์"
-// @Param        github_url   formData string false "ลิงก์ Github"
-// @Param        cover_image  formData file   false "อัปโหลดรูปหน้าปกใหม่ (ถ้าไม่เปลี่ยนไม่ต้องส่ง)"
-// @Success      200  {object}  map[string]interface{}
-// @Failure      404  {object}  map[string]interface{}
-// @Router       /member/projects/{id} [put]
-// @Security     BearerAuth
 func UpdateProject(c *gin.Context) {
 	id := c.Param("id")
 	var project models.Project
 
-	// 1. ตรวจสอบว่ามีโปรเจกต์นี้อยู่จริง
-	if err := config.DB.First(&project, "id = ?", id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบโปรเจกต์ที่ต้องการแก้ไข"})
+	if err := config.DB.Preload("Technologies").Preload("Images").First(&project, "id = ?", id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบโปรเจกต์"})
 		return
 	}
 
-	// 2. รับข้อมูลใหม่แบบ Form-Data
 	title := c.PostForm("title")
 	description := c.PostForm("description")
-	githubURL := c.PostForm("github_url")
+	githubURL := c.PostForm("githubURL") // 🌟 อิงจาก React React ส่ง 'githubURL'
 
-	// 3. จัดการอัปโหลดไฟล์รูปภาพใหม่ (ถ้ามีส่งมา)
-	coverImageURL := project.CoverImageURL // ใช้ของเดิมยืนพื้น
-	file, _, err := c.Request.FormFile("cover_image")
+	// 1. Cover Image
+	coverImageURL := project.CoverImageURL
+	file, _, err := c.Request.FormFile("coverImage")
 	if err == nil {
 		defer file.Close()
-		// 🌟 เรียกใช้ฟังก์ชันจาก utils
 		uploadedURL, uploadErr := utils.UploadToCloudinary(file, "portfolio_projects")
-		if uploadErr != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "อัปโหลดรูปหน้าปกใหม่ล้มเหลว: " + uploadErr.Error()})
-			return
+		if uploadErr == nil {
+			coverImageURL = uploadedURL
 		}
-		coverImageURL = uploadedURL // เปลี่ยนไปใช้รูปใหม่
 	}
 
-	// 4. นำข้อมูลใหม่ไปทับของเดิม
-	if title != "" {
-		project.Title = title
-	}
-	if description != "" {
-		project.Description = description
-	}
-	if githubURL != "" {
-		project.GithubURL = githubURL
-	}
+	// อัปเดตข้อมูล Text พื้นฐาน
+	if title != "" { project.Title = title }
+	if description != "" { project.Description = description }
+	project.GithubURL = githubURL
 	project.CoverImageURL = coverImageURL
+	config.DB.Save(&project)
 
-	// 5. บันทึกลงฐานข้อมูล
-	if err := config.DB.Save(&project).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "อัปเดตข้อมูลไม่สำเร็จ"})
-		return
+	// 🌟 2. อัปเดต Technologies
+	techIDs := c.PostFormArray("techIds")
+	var techs []models.Technology
+	if len(techIDs) > 0 {
+		config.DB.Where("id IN ?", techIDs).Find(&techs)
+	}
+	// .Replace จะลบอันเก่าออกและใส่อันใหม่ให้ (ถ้า array ว่าง มันจะเคลียร์ Tech ทิ้ง)
+	config.DB.Model(&project).Association("Technologies").Replace(techs)
+
+	// 🌟 3. ลบรูปแกลลอรีที่ผู้ใช้กดกากบาท
+	deletedGalleryIds := c.PostFormArray("deletedGalleryIds")
+	if len(deletedGalleryIds) > 0 {
+		config.DB.Where("id IN ?", deletedGalleryIds).Delete(&models.ProjectImage{})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "อัปเดตข้อมูลสำเร็จ!", "data": project})
+	// 🌟 4. อัปเดตคำบรรยาย (Caption) ของรูปแกลลอรีเดิม
+	existingImageIds := c.PostFormArray("existingImageIds")
+	existingImageCaptions := c.PostFormArray("existingImageCaptions")
+	for i, imgID := range existingImageIds {
+		if i < len(existingImageCaptions) {
+			config.DB.Model(&models.ProjectImage{}).Where("id = ?", imgID).Update("caption", existingImageCaptions[i])
+		}
+	}
+
+	// 🌟 5. อัปโหลดและเพิ่มรูปแกลลอรีใหม่
+	form, err := c.MultipartForm()
+	if err == nil {
+		newFiles := form.File["galleryImages"]
+		newCaptions := form.Value["galleryCaptions"]
+
+		for i, fileHeader := range newFiles {
+			f, err := fileHeader.Open()
+			if err != nil { continue }
+
+			uploadedURL, uploadErr := utils.UploadToCloudinary(f, "portfolio_gallery")
+			f.Close()
+
+			if uploadErr == nil {
+				caption := ""
+				if i < len(newCaptions) { caption = newCaptions[i] }
+				
+				config.DB.Create(&models.ProjectImage{
+					ProjectID: project.ID,
+					ImageURL:  uploadedURL,
+					Caption:   caption,
+				})
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "อัปเดตข้อมูลสำเร็จ!"})
 }

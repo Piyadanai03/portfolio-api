@@ -7,17 +7,11 @@ import (
 	"github.com/Piyadanai03/portfolio-api/models"
 )
 
-// GetProjects godoc
-// @Summary      ดึงข้อมูลโปรเจกต์ทั้งหมด
-// @Description  แสดงรายชื่อโปรเจกต์พร้อมรูปภาพประกอบสำหรับหน้าเว็บทั่วไป
-// @Tags         Projects
-// @Produce      json
-// @Success      200  {array}   models.Project
-// @Router       /projects [get]
 func GetProjects(c *gin.Context) {
 	var projects []models.Project
 
-	result := config.DB.Preload("Images").Find(&projects)
+	// 🌟 เติม .Preload("Technologies") เพื่อดึง Tech Stack มาโชว์หน้าตารางด้วย
+	result := config.DB.Preload("Images").Preload("Technologies").Order("created_at desc").Find(&projects)
 
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลได้"})

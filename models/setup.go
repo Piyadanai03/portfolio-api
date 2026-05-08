@@ -26,34 +26,30 @@ type User struct {
 	Contacts    []Contact    `gorm:"foreignKey:UserID" json:"contacts"`
 }
 
-// 2. ตาราง projects
 type Project struct {
-	ID            uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	UserID        uuid.UUID `gorm:"type:uuid;not null"`
-	Title         string    `gorm:"not null"`
-	Description   string
-	CoverImageURL string
-	GithubURL     string
-	CreatedAt     time.Time
-	// Relationships
-	Images       []ProjectImage `gorm:"foreignKey:ProjectID"`
-	Technologies []Technology   `gorm:"many2many:project_technologies;"`
+	ID            uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	UserID        uuid.UUID `gorm:"type:uuid;not null" json:"userID"`
+	Title         string    `gorm:"not null" json:"title"`
+	Description   string    `json:"description"`
+	CoverImageURL string    `json:"coverImageURL"`
+	GithubURL     string    `json:"githubURL"`
+	CreatedAt     time.Time `json:"createdAt"`
+	Images       []ProjectImage `gorm:"foreignKey:ProjectID" json:"images"`
+	Technologies []Technology   `gorm:"many2many:project_technologies;" json:"technologies"`
 }
 
-// 3. ตาราง project_images
 type ProjectImage struct {
-	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	ProjectID uuid.UUID `gorm:"type:uuid;not null"`
-	ImageURL  string    `gorm:"not null"`
-	Caption   string
+	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	ProjectID uuid.UUID `gorm:"type:uuid;not null" json:"projectID"`
+	ImageURL  string    `gorm:"not null" json:"imageURL"`
+	Caption   string    `json:"caption"`
 }
 
-// 4. ตาราง technologies
 type Technology struct {
-	ID       uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	Name     string    `gorm:"unique;not null"`
-	Category string    // Backend, Frontend, AI, etc.
-	IconURL  string
+	ID       uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	Name     string    `gorm:"unique;not null" json:"name"`
+	Category string    `json:"category"`
+	IconURL  string    `json:"iconURL"`
 }
 
 // 5. ตาราง experiences
