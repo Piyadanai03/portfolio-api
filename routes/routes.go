@@ -54,7 +54,6 @@ func SetupRouter() *gin.Engine {
 		member.POST("/projects", projects.CreateProject)
 		member.PUT("/projects/:id", projects.UpdateProject)
 		member.DELETE("/projects/:id", projects.DeleteProject)
-		member.POST("/upload", projects.UploadImage)
 		member.POST("/education", education.CreateEducation)
 		member.DELETE("/education/:id", education.DeleteEducation)
 		member.POST("/experience", experience.CreateExperience)
