@@ -2,47 +2,88 @@ package projects
 
 import (
 	"net/http"
-	"github.com/gin-gonic/gin"
+
 	"github.com/Piyadanai03/portfolio-api/config"
 	"github.com/Piyadanai03/portfolio-api/models"
+	"github.com/Piyadanai03/portfolio-api/utils"
+	"github.com/gin-gonic/gin"
 )
 
-// UpdateProject godoc
-// @Summary      อัปเดตข้อมูลโปรเจกต์
-// @Description  แก้ไขข้อมูลโปรเจกต์ตาม ID (ต้อง Login)
-// @Tags         Projects
-// @Accept       json
-// @Produce      json
-// @Param        id   path      string  true  "ID ของโปรเจกต์"
-// @Param        input  body  object  true  "ข้อมูลโปรเจกต์ที่ต้องการแก้ไข"
-// @Success      200  {object}  map[string]interface{}
-// @Failure      404  {object}  map[string]interface{}
-// @Router       /member/projects/{id} [put]
-// @Security     BearerAuth
 func UpdateProject(c *gin.Context) {
-    id := c.Param("id") // รับ ID จาก URL เช่น /projects/1
-    var project models.Project
+	id := c.Param("id")
+	var project models.Project
 
-    // 1. หาโปรเจกต์ใน DB ก่อนว่ามีอยู่จริงไหม
-    if err := config.DB.First(&project, "id = ?", id).Error; err != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบโปรเจกต์ที่ต้องการแก้ไข"})
-        return
-    }
+	if err := config.DB.Preload("Technologies").Preload("Images").First(&project, "id = ?", id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบโปรเจกต์"})
+		return
+	}
 
-    // 2. รับข้อมูลใหม่จาก Body
-    var input struct {
-        Title         string `json:"title"`
-        Description   string `json:"description"`
-        CoverImageURL string `json:"cover_image_url"`
-        GithubURL     string `json:"github_url"`
-    }
-    if err := c.ShouldBindJSON(&input); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
+	title := c.PostForm("title")
+	description := c.PostForm("description")
+	githubURL := c.PostForm("githubURL")
 
-    // 3. อัปเดตเฉพาะฟิลด์ที่ส่งมา
-    config.DB.Model(&project).Updates(input)
+	// 1. Cover Image
+	coverImageURL := project.CoverImageURL
+	file, _, err := c.Request.FormFile("coverImage")
+	if err == nil {
+		defer file.Close()
+		uploadedURL, uploadErr := utils.UploadToCloudinary(file, "portfolio_projects")
+		if uploadErr == nil {
+			coverImageURL = uploadedURL
+		}
+	}
 
-    c.JSON(http.StatusOK, gin.H{"message": "อัปเดตข้อมูลสำเร็จ!", "data": project})
+	// อัปเดตข้อมูล Text พื้นฐาน
+	if title != "" { project.Title = title }
+	if description != "" { project.Description = description }
+	project.GithubURL = githubURL
+	project.CoverImageURL = coverImageURL
+	config.DB.Save(&project)
+
+	techIDs := c.PostFormArray("techIds")
+	var techs []models.Technology
+	if len(techIDs) > 0 {
+		config.DB.Where("id IN ?", techIDs).Find(&techs)
+	}
+	config.DB.Model(&project).Association("Technologies").Replace(techs)
+
+	deletedGalleryIds := c.PostFormArray("deletedGalleryIds")
+	if len(deletedGalleryIds) > 0 {
+		config.DB.Where("id IN ?", deletedGalleryIds).Delete(&models.ProjectImage{})
+	}
+
+	existingImageIds := c.PostFormArray("existingImageIds")
+	existingImageCaptions := c.PostFormArray("existingImageCaptions")
+	for i, imgID := range existingImageIds {
+		if i < len(existingImageCaptions) {
+			config.DB.Model(&models.ProjectImage{}).Where("id = ?", imgID).Update("caption", existingImageCaptions[i])
+		}
+	}
+
+	form, err := c.MultipartForm()
+	if err == nil {
+		newFiles := form.File["galleryImages"]
+		newCaptions := form.Value["galleryCaptions"]
+
+		for i, fileHeader := range newFiles {
+			f, err := fileHeader.Open()
+			if err != nil { continue }
+
+			uploadedURL, uploadErr := utils.UploadToCloudinary(f, "portfolio_gallery")
+			f.Close()
+
+			if uploadErr == nil {
+				caption := ""
+				if i < len(newCaptions) { caption = newCaptions[i] }
+				
+				config.DB.Create(&models.ProjectImage{
+					ProjectID: project.ID,
+					ImageURL:  uploadedURL,
+					Caption:   caption,
+				})
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "อัปเดตข้อมูลสำเร็จ!"})
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/Piyadanai03/portfolio-api/routes"
 	"github.com/joho/godotenv"
 	"os"
+	"github.com/Piyadanai03/portfolio-api/models"
 )
 
 // @title           Piyadanai Portfolio API
@@ -24,7 +25,7 @@ import (
 func main() {
 	godotenv.Load()
 	config.ConnectDatabase()
-	// models.MigrateDB(config.DB)
+	models.MigrateDB(config.DB)
 
 	r := routes.SetupRouter()
 

@@ -5,6 +5,9 @@ import (
 	"github.com/Piyadanai03/portfolio-api/controllers/education"
 	"github.com/Piyadanai03/portfolio-api/controllers/experience"
 	"github.com/Piyadanai03/portfolio-api/controllers/projects"
+	"github.com/Piyadanai03/portfolio-api/controllers/profile"
+	"github.com/Piyadanai03/portfolio-api/controllers/portfolio"
+	"github.com/Piyadanai03/portfolio-api/controllers/technologies"
 	_ "github.com/Piyadanai03/portfolio-api/docs"
 	"github.com/Piyadanai03/portfolio-api/middleware"
 	"github.com/gin-contrib/cors"
@@ -37,6 +40,8 @@ func SetupRouter() *gin.Engine {
 	v1 := r.Group("/api/v1")
 
 	v1.GET("/projects", projects.GetProjects)
+	v1.GET("/projects/:id", projects.GetProjectByID)
+	v1.GET("/home", portfolio.GetHomeData)
 	v1.POST("/login", auth.Login)
 
 	admin := v1.Group("/admin")
@@ -45,19 +50,25 @@ func SetupRouter() *gin.Engine {
 
 	}
 
-	member := v1.Group("/member")
-	member.Use(middleware.AuthMiddleware())
-	{
-		member.POST("/projects", projects.CreateProject)
-		member.PUT("/projects/:id", projects.UpdateProject)
-		member.DELETE("/projects/:id", projects.DeleteProject)
-		member.POST("/upload", projects.UploadImage)
-		member.POST("/education", education.CreateEducation)
-		member.DELETE("/education/:id", education.DeleteEducation)
-		member.POST("/experience", experience.CreateExperience)
-		member.DELETE("/experience/:id", experience.DeleteExperience)
+member := v1.Group("/member")
+member.Use(middleware.AuthMiddleware())
+{
+	member.POST("/projects", projects.CreateProject)
+	member.PUT("/projects/:id", projects.UpdateProject)
+	member.DELETE("/projects/:id", projects.DeleteProject)
 
-	}
+	member.POST("/education", education.CreateEducation)
+	member.DELETE("/education/:id", education.DeleteEducation)
+
+	member.POST("/experience", experience.CreateExperience)
+	member.DELETE("/experience/:id", experience.DeleteExperience)
+
+	member.POST("/tech", technologies.CreateTech)
+	member.GET("/tech", technologies.GetTechnologies)
+
+	member.GET("/profile", profile.GetProfile)
+	member.PUT("/profile", profile.UpdateProfile)
+}
 
 	return r
 }
