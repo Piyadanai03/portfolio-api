@@ -14,7 +14,7 @@ func CreateProject(c *gin.Context) {
 	// รับข้อมูลจาก Form-Data แบบพื้นฐาน
 	title := c.PostForm("title")
 	description := c.PostForm("description")
-	githubURL := c.PostForm("github_url")
+	githubURL := c.PostForm("githubURL")
 
 	if title == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "กรุณาระบุชื่อโปรเจกต์ (title)"})
@@ -23,7 +23,7 @@ func CreateProject(c *gin.Context) {
 
 	// จัดการอัปโหลด Cover Image
 	var coverImageURL string
-	file, _, err := c.Request.FormFile("coverImage") // ให้ตรงกับ React ('coverImage')
+	file, _, err := c.Request.FormFile("coverImage")
 	if err == nil {
 		defer file.Close()
 		uploadedURL, uploadErr := utils.UploadToCloudinary(file, "portfolio_projects")

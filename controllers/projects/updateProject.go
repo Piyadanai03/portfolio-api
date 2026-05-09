@@ -20,7 +20,7 @@ func UpdateProject(c *gin.Context) {
 
 	title := c.PostForm("title")
 	description := c.PostForm("description")
-	githubURL := c.PostForm("githubURL") // 🌟 อิงจาก React React ส่ง 'githubURL'
+	githubURL := c.PostForm("githubURL")
 
 	// 1. Cover Image
 	coverImageURL := project.CoverImageURL
@@ -40,22 +40,18 @@ func UpdateProject(c *gin.Context) {
 	project.CoverImageURL = coverImageURL
 	config.DB.Save(&project)
 
-	// 🌟 2. อัปเดต Technologies
 	techIDs := c.PostFormArray("techIds")
 	var techs []models.Technology
 	if len(techIDs) > 0 {
 		config.DB.Where("id IN ?", techIDs).Find(&techs)
 	}
-	// .Replace จะลบอันเก่าออกและใส่อันใหม่ให้ (ถ้า array ว่าง มันจะเคลียร์ Tech ทิ้ง)
 	config.DB.Model(&project).Association("Technologies").Replace(techs)
 
-	// 🌟 3. ลบรูปแกลลอรีที่ผู้ใช้กดกากบาท
 	deletedGalleryIds := c.PostFormArray("deletedGalleryIds")
 	if len(deletedGalleryIds) > 0 {
 		config.DB.Where("id IN ?", deletedGalleryIds).Delete(&models.ProjectImage{})
 	}
 
-	// 🌟 4. อัปเดตคำบรรยาย (Caption) ของรูปแกลลอรีเดิม
 	existingImageIds := c.PostFormArray("existingImageIds")
 	existingImageCaptions := c.PostFormArray("existingImageCaptions")
 	for i, imgID := range existingImageIds {
@@ -64,7 +60,6 @@ func UpdateProject(c *gin.Context) {
 		}
 	}
 
-	// 🌟 5. อัปโหลดและเพิ่มรูปแกลลอรีใหม่
 	form, err := c.MultipartForm()
 	if err == nil {
 		newFiles := form.File["galleryImages"]
