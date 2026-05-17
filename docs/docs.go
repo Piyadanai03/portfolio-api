@@ -85,72 +85,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/experiences": {
-            "get": {
-                "description": "ดึงข้อมูลประสบการณ์ทั้งหมด พร้อมโปรเจกต์ที่เกี่ยวข้อง",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Experience"
-                ],
-                "summary": "ดึงรายการประสบการณ์ทำงาน",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Experience"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/experiences/{id}": {
-            "get": {
-                "description": "ดึงข้อมูลประสบการณ์ตาม ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Experience"
-                ],
-                "summary": "ดูประสบการณ์ทำงานตาม ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ID ของประสบการณ์",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Experience"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/login": {
             "post": {
                 "description": "ตรวจสอบ Username/Password และคืนค่า JWT Token",
@@ -483,6 +417,72 @@ const docTemplate = `{
                 }
             }
         },
+        "/member/experiences": {
+            "get": {
+                "description": "ดึงข้อมูลประสบการณ์ทั้งหมด พร้อมโปรเจกต์ที่เกี่ยวข้อง",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Experience"
+                ],
+                "summary": "ดึงรายการประสบการณ์ทำงาน",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Experience"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/member/experiences/{id}": {
+            "get": {
+                "description": "ดึงข้อมูลประสบการณ์ตาม ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Experience"
+                ],
+                "summary": "ดูประสบการณ์ทำงานตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID ของประสบการณ์",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Experience"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/member/projects/{id}": {
             "delete": {
                 "security": [
@@ -568,6 +568,9 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string"
+                },
+                "experience": {
+                    "$ref": "#/definitions/models.Experience"
                 },
                 "experienceID": {
                     "type": "string"

@@ -30,6 +30,8 @@ definitions:
         type: string
       description:
         type: string
+      experience:
+        $ref: '#/definitions/models.Experience'
       experienceID:
         type: string
       githubURL:
@@ -143,50 +145,6 @@ paths:
       summary: ดูข้อมูลการศึกษาตาม ID
       tags:
       - Education
-  /experiences:
-    get:
-      description: ดึงข้อมูลประสบการณ์ทั้งหมด พร้อมโปรเจกต์ที่เกี่ยวข้อง
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Experience'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: ดึงรายการประสบการณ์ทำงาน
-      tags:
-      - Experience
-  /experiences/{id}:
-    get:
-      description: ดึงข้อมูลประสบการณ์ตาม ID
-      parameters:
-      - description: ID ของประสบการณ์
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Experience'
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: ดูประสบการณ์ทำงานตาม ID
-      tags:
-      - Experience
   /login:
     post:
       consumes:
@@ -401,6 +359,50 @@ paths:
       security:
       - BearerAuth: []
       summary: แก้ไขข้อมูลประสบการณ์ทำงาน
+      tags:
+      - Experience
+  /member/experiences:
+    get:
+      description: ดึงข้อมูลประสบการณ์ทั้งหมด พร้อมโปรเจกต์ที่เกี่ยวข้อง
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Experience'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงรายการประสบการณ์ทำงาน
+      tags:
+      - Experience
+  /member/experiences/{id}:
+    get:
+      description: ดึงข้อมูลประสบการณ์ตาม ID
+      parameters:
+      - description: ID ของประสบการณ์
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Experience'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดูประสบการณ์ทำงานตาม ID
       tags:
       - Experience
   /member/projects/{id}:

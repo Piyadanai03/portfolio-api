@@ -15,7 +15,7 @@ import (
 // @Produce      json
 // @Success      200  {array}   models.Experience
 // @Failure      500  {object}  map[string]interface{}
-// @Router       /experiences [get]
+// @Router       /member/experiences [get]
 func GetExperiences(c *gin.Context) {
 	var experiences []models.Experience
 
@@ -37,7 +37,7 @@ func GetExperiences(c *gin.Context) {
 // @Param        id   path      string  true  "ID ของประสบการณ์"
 // @Success      200  {object}  models.Experience
 // @Failure      404  {object}  map[string]interface{}
-// @Router       /experiences/{id} [get]
+// @Router       /member/experiences/{id} [get]
 func GetExperienceByID(c *gin.Context) {
 	id := c.Param("id")
 	var experience models.Experience
