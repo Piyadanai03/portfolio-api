@@ -1,9 +1,10 @@
 package models
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"time"
 )
 
 type User struct {
@@ -17,7 +18,7 @@ type User struct {
 	ProfileImageURL string    `json:"profileImageURL"`
 	ResumeURL       string    `json:"resumeURL"`
 	CreatedAt       time.Time `json:"createdAt"`
-	
+
 	Projects    []Project    `gorm:"foreignKey:UserID" json:"projects,omitempty"`
 	Experiences []Experience `gorm:"foreignKey:UserID" json:"experiences,omitempty"`
 	Studies     []Study      `gorm:"foreignKey:UserID" json:"studies,omitempty"`
@@ -25,17 +26,18 @@ type User struct {
 }
 
 type Project struct {
-    ID            uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
-    UserID        uuid.UUID  `gorm:"type:uuid;not null" json:"userID"`
-    ExperienceID  *uuid.UUID `gorm:"type:uuid" json:"experienceID"` 
-    Title         string     `gorm:"not null" json:"title"`
-    Description   string     `json:"description"`
-    CoverImageURL string     `json:"coverImageURL"`
-    GithubURL     string     `json:"githubURL"`
-    CreatedAt     time.Time  `json:"createdAt"`
-    
-    Images       []ProjectImage `gorm:"foreignKey:ProjectID" json:"images"`
-    Technologies []Technology   `gorm:"many2many:project_technologies;" json:"technologies"`
+	ID            uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	UserID        uuid.UUID  `gorm:"type:uuid;not null" json:"userID"`
+	ExperienceID  *uuid.UUID `gorm:"type:uuid" json:"experienceID"`
+	Title         string     `gorm:"not null" json:"title"`
+	Description   string     `json:"description"`
+	CoverImageURL string     `json:"coverImageURL"`
+	GithubURL     string     `json:"githubURL"`
+	CreatedAt     time.Time  `json:"createdAt"`
+
+	Images       []ProjectImage `gorm:"foreignKey:ProjectID" json:"images"`
+	Technologies []Technology   `gorm:"many2many:project_technologies;" json:"technologies"`
+	Experience   *Experience    `gorm:"foreignKey:ExperienceID" json:"experience"`
 }
 
 type ProjectImage struct {
@@ -53,15 +55,15 @@ type Technology struct {
 }
 
 type Experience struct {
-    ID          uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
-    UserID      uuid.UUID  `gorm:"type:uuid;not null" json:"userID"`
-    JobTitle    string     `json:"jobTitle"`
-    Company     string     `json:"company"`
-    StartDate   time.Time  `json:"startDate"`
-    EndDate     *time.Time `json:"endDate"` // ใช้ pointer เพื่อให้เป็น NULL ได้กรณีปัจจุบันยังทำอยู่
-    Description string     `json:"description"`
+	ID          uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	UserID      uuid.UUID  `gorm:"type:uuid;not null" json:"userID"`
+	JobTitle    string     `json:"jobTitle"`
+	Company     string     `json:"company"`
+	StartDate   time.Time  `json:"startDate"`
+	EndDate     *time.Time `json:"endDate"` // ใช้ pointer เพื่อให้เป็น NULL ได้กรณีปัจจุบันยังทำอยู่
+	Description string     `json:"description"`
 
-    Projects    []Project  `gorm:"foreignKey:ExperienceID" json:"projects,omitempty"`
+	Projects []Project `gorm:"foreignKey:ExperienceID" json:"projects,omitempty"`
 }
 
 type Study struct {
@@ -81,7 +83,7 @@ type Contact struct {
 	PlatformName string    `json:"platformName"`
 	URLValue     string    `json:"urlValue"`
 	IconURL      string    `json:"iconURL"`
-	IsActive     *bool      `gorm:"default:true" json:"isActive"`
+	IsActive     *bool     `gorm:"default:true" json:"isActive"`
 }
 
 type Achievement struct {

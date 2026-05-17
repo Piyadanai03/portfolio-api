@@ -1,16 +1,17 @@
 package projects
 
 import (
+	"net/http"
+
 	"github.com/Piyadanai03/portfolio-api/config"
 	"github.com/Piyadanai03/portfolio-api/models"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func GetProjects(c *gin.Context) {
 	var projects []models.Project
 
-	result := config.DB.Preload("Images").Preload("Technologies").Order("created_at desc").Find(&projects)
+	result := config.DB.Preload("Images").Preload("Technologies").Preload("Experience").Order("created_at desc").Find(&projects)
 
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลได้"})
@@ -28,6 +29,7 @@ func GetProjectByID(c *gin.Context) {
 	result := config.DB.
 		Preload("Images").
 		Preload("Technologies").
+		Preload("Experience").
 		First(&project, "id = ?", id)
 
 	if result.Error != nil {

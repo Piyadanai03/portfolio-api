@@ -42,13 +42,8 @@ func SetupRouter() *gin.Engine {
 
 	v1.GET("/projects", projects.GetProjects)
 	v1.GET("/projects/:id", projects.GetProjectByID)
-	v1.GET("/educations", education.GetEducations)
-	v1.GET("/educations/:id", education.GetEducationByID)
-	v1.GET("/experiences", experience.GetExperiences)
-	v1.GET("/experiences/:id", experience.GetExperienceByID)
 	v1.GET("/home", portfolio.GetHomeData)
 	v1.POST("/login", auth.Login)
-	v1.GET("/tech", technologies.GetTechnologies)
 
 	admin := v1.Group("/admin")
 	admin.Use(middleware.AuthMiddleware())
@@ -62,14 +57,20 @@ func SetupRouter() *gin.Engine {
 		member.POST("/projects", projects.CreateProject)
 		member.PUT("/projects/:id", projects.UpdateProject)
 		member.DELETE("/projects/:id", projects.DeleteProject)
+
+		member.GET("/education", education.GetEducations)
+		member.GET("/education/:id", education.GetEducationByID)
 		member.POST("/education", education.CreateEducation)
 		member.PUT("/education/:id", education.UpdateEducation)
 		member.DELETE("/education/:id", education.DeleteEducation)
 
+		member.GET("/experiences", experience.GetExperiences)
+		member.GET("/experience/:id", experience.GetExperienceByID)
 		member.POST("/experience", experience.CreateExperience)
 		member.PUT("/experience/:id", experience.UpdateExperience)
 		member.DELETE("/experience/:id", experience.DeleteExperience)
 
+		member.GET("/tech", technologies.GetTechnologies)
 		member.POST("/tech", technologies.CreateTech)
 
 		member.GET("/profile", profile.GetProfile)
