@@ -19,6 +19,138 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/educations": {
+            "get": {
+                "description": "ดึงข้อมูลการศึกษาทั้งหมด",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Education"
+                ],
+                "summary": "ดึงรายการการศึกษา",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Study"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/educations/{id}": {
+            "get": {
+                "description": "ดึงข้อมูลการศึกษาตาม ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Education"
+                ],
+                "summary": "ดูข้อมูลการศึกษาตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID ของการศึกษา",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Study"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/experiences": {
+            "get": {
+                "description": "ดึงข้อมูลประสบการณ์ทั้งหมด พร้อมโปรเจกต์ที่เกี่ยวข้อง",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Experience"
+                ],
+                "summary": "ดึงรายการประสบการณ์ทำงาน",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Experience"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/experiences/{id}": {
+            "get": {
+                "description": "ดึงข้อมูลประสบการณ์ตาม ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Experience"
+                ],
+                "summary": "ดูประสบการณ์ทำงานตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID ของประสบการณ์",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Experience"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "ตรวจสอบ Username/Password และคืนค่า JWT Token",
@@ -94,7 +226,8 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Study"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -108,6 +241,65 @@ const docTemplate = `{
             }
         },
         "/member/education/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "อัพเดตข้อมูลการศึกษาตาม ID (ต้อง Login)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Education"
+                ],
+                "summary": "แก้ไขข้อมูลการศึกษา",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID ของการศึกษา",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ข้อมูลการศึกษาที่ต้องการแก้ไข",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -171,7 +363,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Experience"
+                            "type": "object"
                         }
                     }
                 ],
@@ -179,7 +371,8 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Experience"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -193,6 +386,65 @@ const docTemplate = `{
             }
         },
         "/member/experience/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "อัพเดตข้อมูลประสบการณ์ทำงาน (ต้อง Login)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Experience"
+                ],
+                "summary": "แก้ไขข้อมูลประสบการณ์ทำงาน",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID ของประสบการณ์ทำงาน",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ข้อมูลประสบการณ์ทำงานที่ต้องการแก้ไข",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -231,106 +483,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/member/projects": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "บันทึกข้อมูลโปรเจกต์ใหม่ (ต้อง Login)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Projects"
-                ],
-                "summary": "เพิ่มข้อมูลโปรเจกต์",
-                "parameters": [
-                    {
-                        "description": "ข้อมูลโปรเจกต์",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/member/projects/{id}": {
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "แก้ไขข้อมูลโปรเจกต์ตาม ID (ต้อง Login)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Projects"
-                ],
-                "summary": "อัปเดตข้อมูลโปรเจกต์",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ID ของโปรเจกต์",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "ข้อมูลโปรเจกต์ที่ต้องการแก้ไข",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
             "delete": {
                 "security": [
                     {
@@ -368,29 +521,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/projects": {
-            "get": {
-                "description": "แสดงรายชื่อโปรเจกต์พร้อมรูปภาพประกอบสำหรับหน้าเว็บทั่วไป",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Projects"
-                ],
-                "summary": "ดึงข้อมูลโปรเจกต์ทั้งหมด",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Project"
-                            }
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -413,6 +543,12 @@ const docTemplate = `{
                 "jobTitle": {
                     "type": "string"
                 },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Project"
+                    }
+                },
                 "startDate": {
                     "type": "string"
                 },
@@ -433,6 +569,9 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
+                "experienceID": {
+                    "type": "string"
+                },
                 "githubURL": {
                     "type": "string"
                 },
@@ -440,7 +579,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "images": {
-                    "description": "Relationships",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.ProjectImage"
@@ -483,6 +621,12 @@ const docTemplate = `{
                 "degree": {
                     "type": "string"
                 },
+                "faculty": {
+                    "type": "string"
+                },
+                "gpa": {
+                    "type": "number"
+                },
                 "graduationDate": {
                     "type": "string"
                 },
@@ -504,7 +648,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "category": {
-                    "description": "Backend, Frontend, AI, etc.",
                     "type": "string"
                 },
                 "iconURL": {

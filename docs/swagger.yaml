@@ -13,6 +13,10 @@ definitions:
         type: string
       jobTitle:
         type: string
+      projects:
+        items:
+          $ref: '#/definitions/models.Project'
+        type: array
       startDate:
         type: string
       userID:
@@ -26,12 +30,13 @@ definitions:
         type: string
       description:
         type: string
+      experienceID:
+        type: string
       githubURL:
         type: string
       id:
         type: string
       images:
-        description: Relationships
         items:
           $ref: '#/definitions/models.ProjectImage'
         type: array
@@ -59,6 +64,10 @@ definitions:
     properties:
       degree:
         type: string
+      faculty:
+        type: string
+      gpa:
+        type: number
       graduationDate:
         type: string
       id:
@@ -73,7 +82,6 @@ definitions:
   models.Technology:
     properties:
       category:
-        description: Backend, Frontend, AI, etc.
         type: string
       iconURL:
         type: string
@@ -91,6 +99,94 @@ info:
   title: Piyadanai Portfolio API
   version: "1.0"
 paths:
+  /educations:
+    get:
+      description: ดึงข้อมูลการศึกษาทั้งหมด
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Study'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงรายการการศึกษา
+      tags:
+      - Education
+  /educations/{id}:
+    get:
+      description: ดึงข้อมูลการศึกษาตาม ID
+      parameters:
+      - description: ID ของการศึกษา
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Study'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดูข้อมูลการศึกษาตาม ID
+      tags:
+      - Education
+  /experiences:
+    get:
+      description: ดึงข้อมูลประสบการณ์ทั้งหมด พร้อมโปรเจกต์ที่เกี่ยวข้อง
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Experience'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงรายการประสบการณ์ทำงาน
+      tags:
+      - Experience
+  /experiences/{id}:
+    get:
+      description: ดึงข้อมูลประสบการณ์ตาม ID
+      parameters:
+      - description: ID ของประสบการณ์
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Experience'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดูประสบการณ์ทำงานตาม ID
+      tags:
+      - Experience
   /login:
     post:
       consumes:
@@ -137,7 +233,8 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Study'
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
@@ -173,6 +270,45 @@ paths:
       summary: ลบข้อมูลการศึกษา
       tags:
       - Education
+    put:
+      consumes:
+      - application/json
+      description: อัพเดตข้อมูลการศึกษาตาม ID (ต้อง Login)
+      parameters:
+      - description: ID ของการศึกษา
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ข้อมูลการศึกษาที่ต้องการแก้ไข
+        in: body
+        name: input
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: แก้ไขข้อมูลการศึกษา
+      tags:
+      - Education
   /member/experience:
     post:
       consumes:
@@ -184,14 +320,15 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/models.Experience'
+          type: object
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Experience'
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
@@ -227,13 +364,17 @@ paths:
       summary: ลบข้อมูลประสบการณ์ทำงาน
       tags:
       - Experience
-  /member/projects:
-    post:
+    put:
       consumes:
       - application/json
-      description: บันทึกข้อมูลโปรเจกต์ใหม่ (ต้อง Login)
+      description: อัพเดตข้อมูลประสบการณ์ทำงาน (ต้อง Login)
       parameters:
-      - description: ข้อมูลโปรเจกต์
+      - description: ID ของประสบการณ์ทำงาน
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ข้อมูลประสบการณ์ทำงานที่ต้องการแก้ไข
         in: body
         name: input
         required: true
@@ -242,8 +383,8 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
             additionalProperties: true
             type: object
@@ -252,11 +393,16 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
-      summary: เพิ่มข้อมูลโปรเจกต์
+      summary: แก้ไขข้อมูลประสบการณ์ทำงาน
       tags:
-      - Projects
+      - Experience
   /member/projects/{id}:
     delete:
       description: ลบข้อมูลโปรเจกต์ตาม ID (ต้อง Login)
@@ -280,55 +426,6 @@ paths:
       security:
       - BearerAuth: []
       summary: ลบข้อมูลโปรเจกต์
-      tags:
-      - Projects
-    put:
-      consumes:
-      - application/json
-      description: แก้ไขข้อมูลโปรเจกต์ตาม ID (ต้อง Login)
-      parameters:
-      - description: ID ของโปรเจกต์
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: ข้อมูลโปรเจกต์ที่ต้องการแก้ไข
-        in: body
-        name: input
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: อัปเดตข้อมูลโปรเจกต์
-      tags:
-      - Projects
-  /projects:
-    get:
-      description: แสดงรายชื่อโปรเจกต์พร้อมรูปภาพประกอบสำหรับหน้าเว็บทั่วไป
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Project'
-            type: array
-      summary: ดึงข้อมูลโปรเจกต์ทั้งหมด
       tags:
       - Projects
 securityDefinitions:
