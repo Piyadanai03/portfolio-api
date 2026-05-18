@@ -521,6 +521,213 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/member/tech": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "ดึงข้อมูลเทคโนโลยีทั้งหมดจากฐานข้อมูล",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Technology"
+                ],
+                "summary": "ดึงข้อมูลเทคโนโลยีทั้งหมด",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Technology"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/member/tech/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "ดึงข้อมูลเทคโนโลยีจากฐานข้อมูลตาม ID ที่ระบุ",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Technology"
+                ],
+                "summary": "ดึงข้อมูลเทคโนโลยีตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID ของเทคโนโลยี",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Technology"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "อัพเดตข้อมูลเทคโนโลยี (เช่น ชื่อ, หมวดหมู่, และเปลี่ยนรูปไอคอน) (ต้อง Login)",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Technology"
+                ],
+                "summary": "แก้ไขข้อมูลเทคโนโลยี",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID ของเทคโนโลยี",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ชื่อเทคโนโลยี",
+                        "name": "name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "หมวดหมู่เทคโนโลยี",
+                        "name": "category",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "ไฟล์รูปภาพไอคอน",
+                        "name": "icon",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "ลบข้อมูลเทคโนโลยีออกจากระบบตาม ID (ต้อง Login)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Technology"
+                ],
+                "summary": "ลบข้อมูลเทคโนโลยี",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID ของเทคโนโลยี",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {

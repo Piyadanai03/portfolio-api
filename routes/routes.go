@@ -71,7 +71,10 @@ func SetupRouter() *gin.Engine {
 		member.DELETE("/experience/:id", experience.DeleteExperience)
 
 		member.GET("/tech", technologies.GetTechnologies)
+		member.GET("/tech/:id", technologies.GetTechnologyByID)
 		member.POST("/tech", technologies.CreateTech)
+		member.PUT("/tech/:id", technologies.UpdateTech)
+		member.DELETE("/tech/:id", technologies.DeleteTech)
 
 		member.GET("/profile", profile.GetProfile)
 		member.PUT("/profile", profile.UpdateProfile)

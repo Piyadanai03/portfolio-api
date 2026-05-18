@@ -430,6 +430,142 @@ paths:
       summary: ลบข้อมูลโปรเจกต์
       tags:
       - Projects
+  /member/tech:
+    get:
+      consumes:
+      - application/json
+      description: ดึงข้อมูลเทคโนโลยีทั้งหมดจากฐานข้อมูล
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Technology'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: ดึงข้อมูลเทคโนโลยีทั้งหมด
+      tags:
+      - Technology
+  /member/tech/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: ลบข้อมูลเทคโนโลยีออกจากระบบตาม ID (ต้อง Login)
+      parameters:
+      - description: ID ของเทคโนโลยี
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: ลบข้อมูลเทคโนโลยี
+      tags:
+      - Technology
+    get:
+      consumes:
+      - application/json
+      description: ดึงข้อมูลเทคโนโลยีจากฐานข้อมูลตาม ID ที่ระบุ
+      parameters:
+      - description: ID ของเทคโนโลยี
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Technology'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: ดึงข้อมูลเทคโนโลยีตาม ID
+      tags:
+      - Technology
+    put:
+      consumes:
+      - multipart/form-data
+      description: อัพเดตข้อมูลเทคโนโลยี (เช่น ชื่อ, หมวดหมู่, และเปลี่ยนรูปไอคอน)
+        (ต้อง Login)
+      parameters:
+      - description: ID ของเทคโนโลยี
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ชื่อเทคโนโลยี
+        in: formData
+        name: name
+        type: string
+      - description: หมวดหมู่เทคโนโลยี
+        in: formData
+        name: category
+        type: string
+      - description: ไฟล์รูปภาพไอคอน
+        in: formData
+        name: icon
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: แก้ไขข้อมูลเทคโนโลยี
+      tags:
+      - Technology
 securityDefinitions:
   BearerAuth:
     description: ใส่คำว่า "Bearer " ตามด้วย Token ของคุณ
