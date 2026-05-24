@@ -87,16 +87,18 @@ type Contact struct {
 }
 
 type Achievement struct {
-	ID           uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	UserID       uuid.UUID  `gorm:"type:uuid;not null"`
-	ProjectID    *uuid.UUID `gorm:"type:uuid"` // เชื่อมโปรเจกต์ (ถ้ามี)
-	Title        string
-	Category     string // award หรือ training
-	DateAchieved time.Time
+	ID           uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	UserID       uuid.UUID  `gorm:"type:uuid;not null" json:"userID"`
+	
+	Title        string     `json:"title"`
+	Category     string     `json:"category"`
+	DateAchieved time.Time  `json:"dateAchieved"`
+	ProjectID    *uuid.UUID `json:"projectID"`
 }
 
 // ฟังก์ชันสั่ง Run Migration
 func MigrateDB(db *gorm.DB) {
+	
 	db.AutoMigrate(
 		&User{},
 		&Project{},
@@ -108,3 +110,4 @@ func MigrateDB(db *gorm.DB) {
 		&Achievement{},
 	)
 }
+

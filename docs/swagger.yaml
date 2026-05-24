@@ -1,5 +1,46 @@
 basePath: /api/v1
 definitions:
+  achievement.CreateAchievementRequest:
+    properties:
+      category:
+        type: string
+      dateAchieved:
+        type: string
+      projectID:
+        type: string
+      title:
+        type: string
+    required:
+    - category
+    - dateAchieved
+    - title
+    type: object
+  achievement.UpdateAchievementRequest:
+    properties:
+      category:
+        type: string
+      dateAchieved:
+        type: string
+      projectID:
+        type: string
+      title:
+        type: string
+    type: object
+  models.Achievement:
+    properties:
+      category:
+        type: string
+      dateAchieved:
+        type: string
+      id:
+        type: string
+      projectID:
+        type: string
+      title:
+        type: string
+      userID:
+        type: string
+    type: object
   models.Experience:
     properties:
       company:
@@ -173,6 +214,159 @@ paths:
       summary: เข้าสู่ระบบ (Admin)
       tags:
       - Authentication
+  /member/achievement:
+    get:
+      consumes:
+      - application/json
+      description: ดึงข้อมูลความสำเร็จทั้งหมดจากฐานข้อมูล (เรียงจากใหม่ไปเก่า)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Achievement'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: ดึงข้อมูลความสำเร็จทั้งหมด
+      tags:
+      - Achievement
+    post:
+      consumes:
+      - application/json
+      description: สร้างข้อมูลความสำเร็จใหม่ (ต้อง Login)
+      parameters:
+      - description: Achievement data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/achievement.CreateAchievementRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: สร้างข้อมูลความสำเร็จ
+      tags:
+      - Achievement
+  /member/achievement/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: ลบข้อมูลความสำเร็จออกจากระบบตาม ID (ต้อง Login)
+      parameters:
+      - description: ID ของความสำเร็จ
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: ลบข้อมูลความสำเร็จ
+      tags:
+      - Achievement
+    get:
+      consumes:
+      - application/json
+      description: ดึงข้อมูลความสำเร็จตาม ID จากฐานข้อมูล
+      parameters:
+      - description: Achievement ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Achievement'
+      security:
+      - BearerAuth: []
+      summary: ดึงข้อมูลความสำเร็จตาม ID
+      tags:
+      - Achievement
+    put:
+      consumes:
+      - application/json
+      description: อัพเดตข้อมูลความสำเร็จ (ต้อง Login)
+      parameters:
+      - description: ID ของความสำเร็จ
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Achievement data to update
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/achievement.UpdateAchievementRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: แก้ไขข้อมูลความสำเร็จ
+      tags:
+      - Achievement
   /member/education:
     post:
       consumes:

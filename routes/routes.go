@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Piyadanai03/portfolio-api/controllers/achievement"
 	"github.com/Piyadanai03/portfolio-api/controllers/auth"
 	"github.com/Piyadanai03/portfolio-api/controllers/education"
 	"github.com/Piyadanai03/portfolio-api/controllers/experience"
@@ -78,6 +79,12 @@ func SetupRouter() *gin.Engine {
 
 		member.GET("/profile", profile.GetProfile)
 		member.PUT("/profile", profile.UpdateProfile)
+
+		member.GET("/achievement", achievement.GetAchievement)
+		member.GET("/achievement/:id", achievement.GetAchievementByID)
+		member.POST("/achievement", achievement.CreateAchievement)
+		member.PUT("/achievement/:id", achievement.UpdateAchievement)
+		member.DELETE("/achievement/:id", achievement.DeleteAchievement)
 	}
 
 	return r
