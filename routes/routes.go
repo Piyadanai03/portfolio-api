@@ -44,6 +44,7 @@ func SetupRouter() *gin.Engine {
 	v1.GET("/projects", projects.GetProjects)
 	v1.GET("/projects/:id", projects.GetProjectByID)
 	v1.GET("/home", portfolio.GetHomeData)
+	v1.GET("/about", portfolio.GetAbout)
 	v1.POST("/login", auth.Login)
 
 	admin := v1.Group("/admin")
