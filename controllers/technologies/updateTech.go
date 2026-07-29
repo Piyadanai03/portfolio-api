@@ -26,19 +26,21 @@ import (
 // @Router       /member/tech/{id} [put]
 // @Security     BearerAuth
 func UpdateTech(c *gin.Context) {
-	// 🌟 1. รับ ID จาก URL (เป็น String ได้เลย ไม่ต้องแปลงเป็นตัวเลข)
+	// 1. รับ ID จาก URL
 	id := c.Param("id")
 
-	// 2. ค้นหาเทคโนโลยีในฐานข้อมูล (ใช้ String ค้นหา UUID แบบนี้ได้เลย)
+	// 2. ค้นหาเทคโนโลยีในฐานข้อมูล
 	var tech models.Technology
 	if err := config.DB.First(&tech, "id = ?", id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบข้อมูลเทคโนโลยี"})
 		return
 	}
 
-	// 3. รับข้อมูลจาก Form-Data แบบพื้นฐาน
+	// 3. รับข้อมูลจาก Form-Data
 	name := c.PostForm("name")
 	category := c.PostForm("category")
+	// 🌟 เพิ่มบรรทัดนี้: รับค่า iconURL ด้วย
+	iconURL := c.PostForm("iconURL")
 
 	// อัปเดตข้อมูลเทคโนโลยี (ถ้ามีการส่งค่ามา)
 	if name != "" {
@@ -47,8 +49,12 @@ func UpdateTech(c *gin.Context) {
 	if category != "" {
 		tech.Category = category
 	}
+	// 🌟 เพิ่มบรรทัดนี้: อัปเดต iconURL ถ้ามีการส่งข้อความ URL มา
+	if iconURL != "" {
+		tech.IconURL = iconURL
+	}
 
-	// 4. จัดการอัปโหลด Icon Image
+	// 4. จัดการอัปโหลด Icon Image (ถ้ามีการแนบไฟล์มา จะทับ iconURL ข้างบนเสมอ)
 	file, _, err := c.Request.FormFile("icon")
 	if err == nil {
 		defer file.Close()
