@@ -15,6 +15,7 @@ func CreateProject(c *gin.Context) {
 	title := c.PostForm("title")
 	description := c.PostForm("description")
 	githubURL := c.PostForm("githubURL")
+	experienceID := c.PostForm("experienceID")
 
 	if title == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "กรุณาระบุชื่อโปรเจกต์ (title)"})
@@ -37,6 +38,15 @@ func CreateProject(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	uID, _ := uuid.Parse(userID.(string))
 
+	// แปลง experienceID เป็น UUID (ถ้ามีค่า)
+	var expID *uuid.UUID
+	if experienceID != "" {
+		parsedExpID, err := uuid.Parse(experienceID)
+		if err == nil {
+			expID = &parsedExpID
+		}
+	}
+
 	// 3. สร้าง Object โปรเจกต์
 	project := models.Project{
 		UserID:        uID,
@@ -44,6 +54,7 @@ func CreateProject(c *gin.Context) {
 		Description:   description,
 		CoverImageURL: coverImageURL,
 		GithubURL:     githubURL,
+		ExperienceID:  expID,
 	}
 
 	// ดึงข้อมูล Technologies จาก techIds ที่ส่งมาเป็น Array
@@ -71,10 +82,10 @@ func CreateProject(c *gin.Context) {
 			if err != nil {
 				continue
 			}
-			
+
 			uploadedURL, uploadErr := utils.UploadToCloudinary(f, "portfolio_gallery")
 			f.Close()
-			
+
 			if uploadErr == nil {
 				caption := ""
 				if i < len(captions) {

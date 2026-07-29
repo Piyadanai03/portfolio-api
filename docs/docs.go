@@ -19,6 +19,72 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/educations": {
+            "get": {
+                "description": "ดึงข้อมูลการศึกษาทั้งหมด",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Education"
+                ],
+                "summary": "ดึงรายการการศึกษา",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Study"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/educations/{id}": {
+            "get": {
+                "description": "ดึงข้อมูลการศึกษาตาม ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Education"
+                ],
+                "summary": "ดูข้อมูลการศึกษาตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID ของการศึกษา",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Study"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "ตรวจสอบ Username/Password และคืนค่า JWT Token",
@@ -61,6 +127,242 @@ const docTemplate = `{
                 }
             }
         },
+        "/member/achievement": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "ดึงข้อมูลความสำเร็จทั้งหมดจากฐานข้อมูล (เรียงจากใหม่ไปเก่า)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Achievement"
+                ],
+                "summary": "ดึงข้อมูลความสำเร็จทั้งหมด",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Achievement"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "สร้างข้อมูลความสำเร็จใหม่ (ต้อง Login)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Achievement"
+                ],
+                "summary": "สร้างข้อมูลความสำเร็จ",
+                "parameters": [
+                    {
+                        "description": "Achievement data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/achievement.CreateAchievementRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/member/achievement/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "ดึงข้อมูลความสำเร็จตาม ID จากฐานข้อมูล",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Achievement"
+                ],
+                "summary": "ดึงข้อมูลความสำเร็จตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Achievement ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Achievement"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "อัพเดตข้อมูลความสำเร็จ (ต้อง Login)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Achievement"
+                ],
+                "summary": "แก้ไขข้อมูลความสำเร็จ",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID ของความสำเร็จ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Achievement data to update",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/achievement.UpdateAchievementRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "ลบข้อมูลความสำเร็จออกจากระบบตาม ID (ต้อง Login)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Achievement"
+                ],
+                "summary": "ลบข้อมูลความสำเร็จ",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID ของความสำเร็จ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/member/education": {
             "post": {
                 "security": [
@@ -94,7 +396,8 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Study"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -108,6 +411,65 @@ const docTemplate = `{
             }
         },
         "/member/education/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "อัพเดตข้อมูลการศึกษาตาม ID (ต้อง Login)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Education"
+                ],
+                "summary": "แก้ไขข้อมูลการศึกษา",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID ของการศึกษา",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ข้อมูลการศึกษาที่ต้องการแก้ไข",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -171,7 +533,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Experience"
+                            "type": "object"
                         }
                     }
                 ],
@@ -179,7 +541,8 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Experience"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -193,6 +556,65 @@ const docTemplate = `{
             }
         },
         "/member/experience/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "อัพเดตข้อมูลประสบการณ์ทำงาน (ต้อง Login)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Experience"
+                ],
+                "summary": "แก้ไขข้อมูลประสบการณ์ทำงาน",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID ของประสบการณ์ทำงาน",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ข้อมูลประสบการณ์ทำงานที่ต้องการแก้ไข",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -231,45 +653,28 @@ const docTemplate = `{
                 }
             }
         },
-        "/member/projects": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "บันทึกข้อมูลโปรเจกต์ใหม่ (ต้อง Login)",
-                "consumes": [
-                    "application/json"
-                ],
+        "/member/experiences": {
+            "get": {
+                "description": "ดึงข้อมูลประสบการณ์ทั้งหมด พร้อมโปรเจกต์ที่เกี่ยวข้อง",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Projects"
+                    "Experience"
                 ],
-                "summary": "เพิ่มข้อมูลโปรเจกต์",
-                "parameters": [
-                    {
-                        "description": "ข้อมูลโปรเจกต์",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
+                "summary": "ดึงรายการประสบการณ์ทำงาน",
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Experience"
+                            }
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -278,48 +683,30 @@ const docTemplate = `{
                 }
             }
         },
-        "/member/projects/{id}": {
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "แก้ไขข้อมูลโปรเจกต์ตาม ID (ต้อง Login)",
-                "consumes": [
-                    "application/json"
-                ],
+        "/member/experiences/{id}": {
+            "get": {
+                "description": "ดึงข้อมูลประสบการณ์ตาม ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Projects"
+                    "Experience"
                 ],
-                "summary": "อัปเดตข้อมูลโปรเจกต์",
+                "summary": "ดูประสบการณ์ทำงานตาม ID",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID ของโปรเจกต์",
+                        "description": "ID ของประสบการณ์",
                         "name": "id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "ข้อมูลโปรเจกต์ที่ต้องการแก้ไข",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.Experience"
                         }
                     },
                     "404": {
@@ -330,7 +717,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/member/projects/{id}": {
             "delete": {
                 "security": [
                     {
@@ -369,24 +758,208 @@ const docTemplate = `{
                 }
             }
         },
-        "/projects": {
+        "/member/tech": {
             "get": {
-                "description": "แสดงรายชื่อโปรเจกต์พร้อมรูปภาพประกอบสำหรับหน้าเว็บทั่วไป",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "ดึงข้อมูลเทคโนโลยีทั้งหมดจากฐานข้อมูล",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Projects"
+                    "Technology"
                 ],
-                "summary": "ดึงข้อมูลโปรเจกต์ทั้งหมด",
+                "summary": "ดึงข้อมูลเทคโนโลยีทั้งหมด",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Project"
+                                "$ref": "#/definitions/models.Technology"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/member/tech/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "ดึงข้อมูลเทคโนโลยีจากฐานข้อมูลตาม ID ที่ระบุ",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Technology"
+                ],
+                "summary": "ดึงข้อมูลเทคโนโลยีตาม ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID ของเทคโนโลยี",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Technology"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "อัพเดตข้อมูลเทคโนโลยี (เช่น ชื่อ, หมวดหมู่, และเปลี่ยนรูปไอคอน) (ต้อง Login)",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Technology"
+                ],
+                "summary": "แก้ไขข้อมูลเทคโนโลยี",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID ของเทคโนโลยี",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ชื่อเทคโนโลยี",
+                        "name": "name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "หมวดหมู่เทคโนโลยี",
+                        "name": "category",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "ไฟล์รูปภาพไอคอน",
+                        "name": "icon",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "ลบข้อมูลเทคโนโลยีออกจากระบบตาม ID (ต้อง Login)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Technology"
+                ],
+                "summary": "ลบข้อมูลเทคโนโลยี",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID ของเทคโนโลยี",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 }
@@ -394,6 +967,68 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "achievement.CreateAchievementRequest": {
+            "type": "object",
+            "required": [
+                "category",
+                "dateAchieved",
+                "title"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "dateAchieved": {
+                    "type": "string"
+                },
+                "projectID": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "achievement.UpdateAchievementRequest": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "dateAchieved": {
+                    "type": "string"
+                },
+                "projectID": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Achievement": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "dateAchieved": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "projectID": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Experience": {
             "type": "object",
             "properties": {
@@ -412,6 +1047,12 @@ const docTemplate = `{
                 },
                 "jobTitle": {
                     "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Project"
+                    }
                 },
                 "startDate": {
                     "type": "string"
@@ -433,6 +1074,12 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
+                "experience": {
+                    "$ref": "#/definitions/models.Experience"
+                },
+                "experienceID": {
+                    "type": "string"
+                },
                 "githubURL": {
                     "type": "string"
                 },
@@ -440,7 +1087,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "images": {
-                    "description": "Relationships",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.ProjectImage"
@@ -483,6 +1129,12 @@ const docTemplate = `{
                 "degree": {
                     "type": "string"
                 },
+                "faculty": {
+                    "type": "string"
+                },
+                "gpa": {
+                    "type": "number"
+                },
                 "graduationDate": {
                     "type": "string"
                 },
@@ -504,7 +1156,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "category": {
-                    "description": "Backend, Frontend, AI, etc.",
                     "type": "string"
                 },
                 "iconURL": {

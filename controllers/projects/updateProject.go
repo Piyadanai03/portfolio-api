@@ -7,13 +7,14 @@ import (
 	"github.com/Piyadanai03/portfolio-api/models"
 	"github.com/Piyadanai03/portfolio-api/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func UpdateProject(c *gin.Context) {
 	id := c.Param("id")
 	var project models.Project
 
-	if err := config.DB.Preload("Technologies").Preload("Images").First(&project, "id = ?", id).Error; err != nil {
+	if err := config.DB.Preload("Technologies").Preload("Images").Preload("Experience").First(&project, "id = ?", id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบโปรเจกต์"})
 		return
 	}
@@ -21,6 +22,7 @@ func UpdateProject(c *gin.Context) {
 	title := c.PostForm("title")
 	description := c.PostForm("description")
 	githubURL := c.PostForm("githubURL")
+	experienceID := c.PostForm("experienceID")
 
 	// 1. Cover Image
 	coverImageURL := project.CoverImageURL
@@ -34,10 +36,25 @@ func UpdateProject(c *gin.Context) {
 	}
 
 	// อัปเดตข้อมูล Text พื้นฐาน
-	if title != "" { project.Title = title }
-	if description != "" { project.Description = description }
+	if title != "" {
+		project.Title = title
+	}
+	if description != "" {
+		project.Description = description
+	}
 	project.GithubURL = githubURL
 	project.CoverImageURL = coverImageURL
+
+	// อัปเดต Experience
+	if experienceID != "" {
+		parsedExpID, err := uuid.Parse(experienceID)
+		if err == nil {
+			project.ExperienceID = &parsedExpID
+		}
+	} else {
+		project.ExperienceID = nil
+	}
+
 	config.DB.Save(&project)
 
 	techIDs := c.PostFormArray("techIds")
@@ -67,15 +84,19 @@ func UpdateProject(c *gin.Context) {
 
 		for i, fileHeader := range newFiles {
 			f, err := fileHeader.Open()
-			if err != nil { continue }
+			if err != nil {
+				continue
+			}
 
 			uploadedURL, uploadErr := utils.UploadToCloudinary(f, "portfolio_gallery")
 			f.Close()
 
 			if uploadErr == nil {
 				caption := ""
-				if i < len(newCaptions) { caption = newCaptions[i] }
-				
+				if i < len(newCaptions) {
+					caption = newCaptions[i]
+				}
+
 				config.DB.Create(&models.ProjectImage{
 					ProjectID: project.ID,
 					ImageURL:  uploadedURL,

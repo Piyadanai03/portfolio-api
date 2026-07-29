@@ -1,5 +1,46 @@
 basePath: /api/v1
 definitions:
+  achievement.CreateAchievementRequest:
+    properties:
+      category:
+        type: string
+      dateAchieved:
+        type: string
+      projectID:
+        type: string
+      title:
+        type: string
+    required:
+    - category
+    - dateAchieved
+    - title
+    type: object
+  achievement.UpdateAchievementRequest:
+    properties:
+      category:
+        type: string
+      dateAchieved:
+        type: string
+      projectID:
+        type: string
+      title:
+        type: string
+    type: object
+  models.Achievement:
+    properties:
+      category:
+        type: string
+      dateAchieved:
+        type: string
+      id:
+        type: string
+      projectID:
+        type: string
+      title:
+        type: string
+      userID:
+        type: string
+    type: object
   models.Experience:
     properties:
       company:
@@ -13,6 +54,10 @@ definitions:
         type: string
       jobTitle:
         type: string
+      projects:
+        items:
+          $ref: '#/definitions/models.Project'
+        type: array
       startDate:
         type: string
       userID:
@@ -26,12 +71,15 @@ definitions:
         type: string
       description:
         type: string
+      experience:
+        $ref: '#/definitions/models.Experience'
+      experienceID:
+        type: string
       githubURL:
         type: string
       id:
         type: string
       images:
-        description: Relationships
         items:
           $ref: '#/definitions/models.ProjectImage'
         type: array
@@ -59,6 +107,10 @@ definitions:
     properties:
       degree:
         type: string
+      faculty:
+        type: string
+      gpa:
+        type: number
       graduationDate:
         type: string
       id:
@@ -73,7 +125,6 @@ definitions:
   models.Technology:
     properties:
       category:
-        description: Backend, Frontend, AI, etc.
         type: string
       iconURL:
         type: string
@@ -91,6 +142,50 @@ info:
   title: Piyadanai Portfolio API
   version: "1.0"
 paths:
+  /educations:
+    get:
+      description: ดึงข้อมูลการศึกษาทั้งหมด
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Study'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงรายการการศึกษา
+      tags:
+      - Education
+  /educations/{id}:
+    get:
+      description: ดึงข้อมูลการศึกษาตาม ID
+      parameters:
+      - description: ID ของการศึกษา
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Study'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดูข้อมูลการศึกษาตาม ID
+      tags:
+      - Education
   /login:
     post:
       consumes:
@@ -119,6 +214,159 @@ paths:
       summary: เข้าสู่ระบบ (Admin)
       tags:
       - Authentication
+  /member/achievement:
+    get:
+      consumes:
+      - application/json
+      description: ดึงข้อมูลความสำเร็จทั้งหมดจากฐานข้อมูล (เรียงจากใหม่ไปเก่า)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Achievement'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: ดึงข้อมูลความสำเร็จทั้งหมด
+      tags:
+      - Achievement
+    post:
+      consumes:
+      - application/json
+      description: สร้างข้อมูลความสำเร็จใหม่ (ต้อง Login)
+      parameters:
+      - description: Achievement data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/achievement.CreateAchievementRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: สร้างข้อมูลความสำเร็จ
+      tags:
+      - Achievement
+  /member/achievement/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: ลบข้อมูลความสำเร็จออกจากระบบตาม ID (ต้อง Login)
+      parameters:
+      - description: ID ของความสำเร็จ
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: ลบข้อมูลความสำเร็จ
+      tags:
+      - Achievement
+    get:
+      consumes:
+      - application/json
+      description: ดึงข้อมูลความสำเร็จตาม ID จากฐานข้อมูล
+      parameters:
+      - description: Achievement ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Achievement'
+      security:
+      - BearerAuth: []
+      summary: ดึงข้อมูลความสำเร็จตาม ID
+      tags:
+      - Achievement
+    put:
+      consumes:
+      - application/json
+      description: อัพเดตข้อมูลความสำเร็จ (ต้อง Login)
+      parameters:
+      - description: ID ของความสำเร็จ
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Achievement data to update
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/achievement.UpdateAchievementRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: แก้ไขข้อมูลความสำเร็จ
+      tags:
+      - Achievement
   /member/education:
     post:
       consumes:
@@ -137,7 +385,8 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Study'
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
@@ -173,6 +422,45 @@ paths:
       summary: ลบข้อมูลการศึกษา
       tags:
       - Education
+    put:
+      consumes:
+      - application/json
+      description: อัพเดตข้อมูลการศึกษาตาม ID (ต้อง Login)
+      parameters:
+      - description: ID ของการศึกษา
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ข้อมูลการศึกษาที่ต้องการแก้ไข
+        in: body
+        name: input
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: แก้ไขข้อมูลการศึกษา
+      tags:
+      - Education
   /member/experience:
     post:
       consumes:
@@ -184,14 +472,15 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/models.Experience'
+          type: object
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Experience'
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
@@ -227,13 +516,17 @@ paths:
       summary: ลบข้อมูลประสบการณ์ทำงาน
       tags:
       - Experience
-  /member/projects:
-    post:
+    put:
       consumes:
       - application/json
-      description: บันทึกข้อมูลโปรเจกต์ใหม่ (ต้อง Login)
+      description: อัพเดตข้อมูลประสบการณ์ทำงาน (ต้อง Login)
       parameters:
-      - description: ข้อมูลโปรเจกต์
+      - description: ID ของประสบการณ์ทำงาน
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ข้อมูลประสบการณ์ทำงานที่ต้องการแก้ไข
         in: body
         name: input
         required: true
@@ -242,8 +535,8 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
             additionalProperties: true
             type: object
@@ -252,11 +545,60 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
-      summary: เพิ่มข้อมูลโปรเจกต์
+      summary: แก้ไขข้อมูลประสบการณ์ทำงาน
       tags:
-      - Projects
+      - Experience
+  /member/experiences:
+    get:
+      description: ดึงข้อมูลประสบการณ์ทั้งหมด พร้อมโปรเจกต์ที่เกี่ยวข้อง
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Experience'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดึงรายการประสบการณ์ทำงาน
+      tags:
+      - Experience
+  /member/experiences/{id}:
+    get:
+      description: ดึงข้อมูลประสบการณ์ตาม ID
+      parameters:
+      - description: ID ของประสบการณ์
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Experience'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ดูประสบการณ์ทำงานตาม ID
+      tags:
+      - Experience
   /member/projects/{id}:
     delete:
       description: ลบข้อมูลโปรเจกต์ตาม ID (ต้อง Login)
@@ -282,22 +624,36 @@ paths:
       summary: ลบข้อมูลโปรเจกต์
       tags:
       - Projects
-    put:
+  /member/tech:
+    get:
       consumes:
       - application/json
-      description: แก้ไขข้อมูลโปรเจกต์ตาม ID (ต้อง Login)
+      description: ดึงข้อมูลเทคโนโลยีทั้งหมดจากฐานข้อมูล
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Technology'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: ดึงข้อมูลเทคโนโลยีทั้งหมด
+      tags:
+      - Technology
+  /member/tech/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: ลบข้อมูลเทคโนโลยีออกจากระบบตาม ID (ต้อง Login)
       parameters:
-      - description: ID ของโปรเจกต์
+      - description: ID ของเทคโนโลยี
         in: path
         name: id
         required: true
         type: string
-      - description: ข้อมูลโปรเจกต์ที่ต้องการแก้ไข
-        in: body
-        name: input
-        required: true
-        schema:
-          type: object
       produces:
       - application/json
       responses:
@@ -311,26 +667,99 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
-      summary: อัปเดตข้อมูลโปรเจกต์
+      summary: ลบข้อมูลเทคโนโลยี
       tags:
-      - Projects
-  /projects:
+      - Technology
     get:
-      description: แสดงรายชื่อโปรเจกต์พร้อมรูปภาพประกอบสำหรับหน้าเว็บทั่วไป
+      consumes:
+      - application/json
+      description: ดึงข้อมูลเทคโนโลยีจากฐานข้อมูลตาม ID ที่ระบุ
+      parameters:
+      - description: ID ของเทคโนโลยี
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/models.Project'
-            type: array
-      summary: ดึงข้อมูลโปรเจกต์ทั้งหมด
+            $ref: '#/definitions/models.Technology'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: ดึงข้อมูลเทคโนโลยีตาม ID
       tags:
-      - Projects
+      - Technology
+    put:
+      consumes:
+      - multipart/form-data
+      description: อัพเดตข้อมูลเทคโนโลยี (เช่น ชื่อ, หมวดหมู่, และเปลี่ยนรูปไอคอน)
+        (ต้อง Login)
+      parameters:
+      - description: ID ของเทคโนโลยี
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ชื่อเทคโนโลยี
+        in: formData
+        name: name
+        type: string
+      - description: หมวดหมู่เทคโนโลยี
+        in: formData
+        name: category
+        type: string
+      - description: ไฟล์รูปภาพไอคอน
+        in: formData
+        name: icon
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: แก้ไขข้อมูลเทคโนโลยี
+      tags:
+      - Technology
 securityDefinitions:
   BearerAuth:
     description: ใส่คำว่า "Bearer " ตามด้วย Token ของคุณ

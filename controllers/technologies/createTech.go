@@ -13,14 +13,15 @@ func CreateTech(c *gin.Context) {
 	// รับข้อมูลจาก Form-Data แบบพื้นฐาน
 	name := c.PostForm("name")
 	category := c.PostForm("category")
+	// 🌟 เพิ่มบรรทัดนี้: รับค่า iconURL จาก Form-Data ด้วย
+	iconURL := c.PostForm("iconURL")
 
 	if name == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "กรุณาระบุชื่อเทคโนโลยี (name)"})
 		return
 	}
 
-	// จัดการอัปโหลด Icon Image
-	var iconURL string
+	// จัดการอัปโหลด Icon Image (ถ้ามีไฟล์มา จะทับ iconURL ข้างบนเสมอ)
 	file, _, err := c.Request.FormFile("icon")
 	if err == nil {
 		defer file.Close()

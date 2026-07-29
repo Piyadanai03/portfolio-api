@@ -1,12 +1,12 @@
 package models
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"time"
 )
 
-// 1. ตาราง users (Admin & Profile)
 type User struct {
 	ID              uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
 	Username        string    `gorm:"unique;not null" json:"username"`
@@ -18,8 +18,7 @@ type User struct {
 	ProfileImageURL string    `json:"profileImageURL"`
 	ResumeURL       string    `json:"resumeURL"`
 	CreatedAt       time.Time `json:"createdAt"`
-	
-	// Relationships
+
 	Projects    []Project    `gorm:"foreignKey:UserID" json:"projects,omitempty"`
 	Experiences []Experience `gorm:"foreignKey:UserID" json:"experiences,omitempty"`
 	Studies     []Study      `gorm:"foreignKey:UserID" json:"studies,omitempty"`
@@ -27,15 +26,18 @@ type User struct {
 }
 
 type Project struct {
-	ID            uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
-	UserID        uuid.UUID `gorm:"type:uuid;not null" json:"userID"`
-	Title         string    `gorm:"not null" json:"title"`
-	Description   string    `json:"description"`
-	CoverImageURL string    `json:"coverImageURL"`
-	GithubURL     string    `json:"githubURL"`
-	CreatedAt     time.Time `json:"createdAt"`
+	ID            uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	UserID        uuid.UUID  `gorm:"type:uuid;not null" json:"userID"`
+	ExperienceID  *uuid.UUID `gorm:"type:uuid" json:"experienceID"`
+	Title         string     `gorm:"not null" json:"title"`
+	Description   string     `json:"description"`
+	CoverImageURL string     `json:"coverImageURL"`
+	GithubURL     string     `json:"githubURL"`
+	CreatedAt     time.Time  `json:"createdAt"`
+
 	Images       []ProjectImage `gorm:"foreignKey:ProjectID" json:"images"`
 	Technologies []Technology   `gorm:"many2many:project_technologies;" json:"technologies"`
+	Experience   *Experience    `gorm:"foreignKey:ExperienceID" json:"experience"`
 }
 
 type ProjectImage struct {
@@ -52,49 +54,51 @@ type Technology struct {
 	IconURL  string    `json:"iconURL"`
 }
 
-// 5. ตาราง experiences
 type Experience struct {
-	ID          uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	UserID      uuid.UUID `gorm:"type:uuid;not null"`
-	JobTitle    string
-	Company     string
-	StartDate   time.Time
-	EndDate     *time.Time // ใช้ pointer เพื่อให้เป็น NULL ได้กรณีปัจจุบันยังทำอยู่
-	Description string
+	ID          uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	UserID      uuid.UUID  `gorm:"type:uuid;not null" json:"userID"`
+	JobTitle    string     `json:"jobTitle"`
+	Company     string     `json:"company"`
+	StartDate   time.Time  `json:"startDate"`
+	EndDate     *time.Time `json:"endDate"` // ใช้ pointer เพื่อให้เป็น NULL ได้กรณีปัจจุบันยังทำอยู่
+	Description string     `json:"description"`
+
+	Projects []Project `gorm:"foreignKey:ExperienceID" json:"projects,omitempty"`
 }
 
-// 6. ตาราง study
 type Study struct {
-	ID             uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	UserID         uuid.UUID `gorm:"type:uuid;not null"`
-	Degree         string
-	Major          string
-	Institution    string
-	GraduationDate time.Time
+	ID             uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	UserID         uuid.UUID `gorm:"type:uuid;not null" json:"userID"`
+	Degree         string    `json:"degree"`
+	Faculty        string    `json:"faculty"`
+	Major          string    `json:"major"`
+	Institution    string    `json:"institution"`
+	GPA            *float64  `json:"gpa"`
+	GraduationDate time.Time `json:"graduationDate"`
 }
 
-// 7. ตาราง contact_info
 type Contact struct {
 	ID           uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id,omitempty"`
 	UserID       uuid.UUID `gorm:"type:uuid;not null" json:"userID"`
 	PlatformName string    `json:"platformName"`
 	URLValue     string    `json:"urlValue"`
 	IconURL      string    `json:"iconURL"`
-	IsActive     *bool      `gorm:"default:true" json:"isActive"`
+	IsActive     *bool     `gorm:"default:true" json:"isActive"`
 }
 
-// 8. ตาราง achievements
 type Achievement struct {
-	ID           uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	UserID       uuid.UUID  `gorm:"type:uuid;not null"`
-	ProjectID    *uuid.UUID `gorm:"type:uuid"` // เชื่อมโปรเจกต์ (ถ้ามี)
-	Title        string
-	Category     string // award หรือ training
-	DateAchieved time.Time
+	ID           uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	UserID       uuid.UUID  `gorm:"type:uuid;not null" json:"userID"`
+	
+	Title        string     `json:"title"`
+	Category     string     `json:"category"`
+	DateAchieved time.Time  `json:"dateAchieved"`
+	ProjectID    *uuid.UUID `json:"projectID"`
 }
 
 // ฟังก์ชันสั่ง Run Migration
 func MigrateDB(db *gorm.DB) {
+	
 	db.AutoMigrate(
 		&User{},
 		&Project{},
@@ -106,3 +110,4 @@ func MigrateDB(db *gorm.DB) {
 		&Achievement{},
 	)
 }
+
