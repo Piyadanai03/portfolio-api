@@ -7,59 +7,63 @@ import (
 
 	"github.com/Piyadanai03/portfolio-api/config"
 	"github.com/Piyadanai03/portfolio-api/models"
-	"github.com/Piyadanai03/portfolio-api/utils" // 🌟 Import โฟลเดอร์ utils
+	"github.com/Piyadanai03/portfolio-api/utils"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 // UpdateProfile อัปเดตข้อมูล Profile แบบครบวงจร
 func UpdateProfile(c *gin.Context) {
-	// 1. ดึง userID จาก Token
 	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "ไม่พบข้อมูลยืนยันตัวตน"})
 		return
 	}
 
-	// 2. ค้นหา User คนปัจจุบัน
 	var user models.User
 	if err := config.DB.Where("id = ?", userID).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบข้อมูลผู้ใช้"})
 		return
 	}
 
-	// 3. อ่านข้อมูล Text
 	fullName := c.PostForm("fullName")
 	position := c.PostForm("position")
 	bioText := c.PostForm("bioText")
 	address := c.PostForm("address")
 	contactsJSON := c.PostForm("contacts")
 
-	// 4. อัปโหลดรูปภาพ Profile (ถ้ามี)
-	profileImageURL := user.ProfileImageURL
+	// 🌟 1. รับค่า URL ที่พิมพ์มาจากฟอร์ม ถ้ามีค่าให้เอามาใช้ก่อน
+	profileImageURL := c.PostForm("profileImageURL")
+	if profileImageURL == "" {
+		profileImageURL = user.ProfileImageURL // ถ้าไม่ส่งมา ให้ใช้ค่าเดิมใน DB
+	}
+
+	resumeURL := c.PostForm("resumeURL")
+	if resumeURL == "" {
+		resumeURL = user.ResumeURL // ถ้าไม่ส่งมา ให้ใช้ค่าเดิมใน DB
+	}
+
+	// 🌟 2. อัปโหลดรูปภาพ Profile (ถ้ามีไฟล์แนบมา จะทับ URL ด้านบนเสมอ)
 	profileFile, _, err := c.Request.FormFile("profileImage")
 	if err == nil {
 		defer profileFile.Close()
-		// 🌟 เรียกใช้จาก utils
 		uploadedURL, uploadErr := utils.UploadToCloudinary(profileFile, "portfolio_profiles")
 		if uploadErr == nil {
 			profileImageURL = uploadedURL
 		}
 	}
 
-	// 5. อัปโหลด Resume (ถ้ามี)
-	resumeURL := user.ResumeURL
+	// 🌟 3. อัปโหลด Resume (ถ้ามีไฟล์แนบมา จะทับ URL ด้านบนเสมอ)
 	resumeFile, _, err := c.Request.FormFile("resume")
 	if err == nil {
 		defer resumeFile.Close()
-		// 🌟 เรียกใช้จาก utils
 		uploadedURL, uploadErr := utils.UploadToCloudinary(resumeFile, "portfolio_resumes")
 		if uploadErr == nil {
 			resumeURL = uploadedURL
 		}
 	}
 
-	// 6. บันทึกข้อมูลส่วนตัวลง DB
+	// 4. บันทึกข้อมูลส่วนตัวลง DB
 	if fullName != "" {
 		user.FullName = fullName
 	}
@@ -80,7 +84,7 @@ func UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	// 7. จัดการข้อมูล Contacts ด้วย Transaction
+	// 5. จัดการข้อมูล Contacts ด้วย Transaction (โค้ดเดิมของคุณ)
 	if contactsJSON != "" {
 		var contacts []models.Contact
 		if err := json.Unmarshal([]byte(contactsJSON), &contacts); err != nil {
