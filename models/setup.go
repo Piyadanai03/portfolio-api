@@ -33,7 +33,9 @@ type Project struct {
 	Description   string     `json:"description"`
 	CoverImageURL string     `json:"coverImageURL"`
 	GithubURL     string     `json:"githubURL"`
+	IsFeatured     bool      `gorm:"default:false" json:"isFeatured"`
 	CreatedAt     time.Time  `json:"createdAt"`
+
 
 	Images       []ProjectImage `gorm:"foreignKey:ProjectID" json:"images"`
 	Technologies []Technology   `gorm:"many2many:project_technologies;" json:"technologies"`
