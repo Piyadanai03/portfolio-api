@@ -6,7 +6,9 @@ import (
 
 	"github.com/Piyadanai03/portfolio-api/config"
 	"github.com/Piyadanai03/portfolio-api/models"
+	"github.com/Piyadanai03/portfolio-api/utils"
 	"github.com/gin-gonic/gin"
+	
 )
 
 func GetHomeData(c *gin.Context) {
@@ -15,14 +17,14 @@ func GetHomeData(c *gin.Context) {
 	ownerID := os.Getenv("USER_ID")
 	
 	if ownerID == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "ระบบยังไม่ได้ตั้งค่า USER_ID ของเจ้าของเว็บ"})
+		c.JSON(http.StatusInternalServerError, utils.Error("not found ownerID"))
 		return
 	}
 
 	if err := config.DB.Preload("Projects").Where("id = ?", ownerID).First(&user).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบข้อมูลโปรไฟล์ของเจ้าของเว็บ"})
+		c.JSON(http.StatusNotFound, utils.Error("user not found"))
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, utils.Success(user))
 }
