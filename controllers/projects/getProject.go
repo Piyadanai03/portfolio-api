@@ -11,10 +11,20 @@ import (
 
 func GetProjects(c *gin.Context) {
 	var projects []models.Project
+	experienceID := c.Query("experience_id")
 
-	result := config.DB.Preload("Images").Preload("Technologies").Preload("Experience").Preload("Achievements").Order("created_at desc").Find(&projects)
+	dbQuery := config.DB.
+		Preload("Images").
+		Preload("Technologies").
+		Preload("Experience").
+		Preload("Achievements").
+		Order("created_at desc")
 
-	if result.Error != nil {
+	if experienceID != "" {
+		dbQuery = dbQuery.Where("experience_id = ?", experienceID)
+	}
+
+	if err := dbQuery.Find(&projects).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, utils.Error("failed to fetch projects"))
 		return
 	}
