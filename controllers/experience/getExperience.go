@@ -5,6 +5,7 @@ import (
 
 	"github.com/Piyadanai03/portfolio-api/config"
 	"github.com/Piyadanai03/portfolio-api/models"
+	"github.com/Piyadanai03/portfolio-api/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,11 +23,11 @@ func GetExperiences(c *gin.Context) {
 	result := config.DB.Preload("Projects").Order("start_date desc").Find(&experiences)
 
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูลได้"})
+		c.JSON(http.StatusInternalServerError, utils.Error("not found experiences"))
 		return
 	}
 
-	c.JSON(http.StatusOK, experiences)
+	c.JSON(http.StatusOK, utils.Success(experiences, "Experiences fetched successfully"))
 }
 
 // GetExperienceByID godoc
@@ -45,9 +46,9 @@ func GetExperienceByID(c *gin.Context) {
 	result := config.DB.Preload("Projects").First(&experience, "id = ?", id)
 
 	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบข้อมูลประสบการณ์"})
+		c.JSON(http.StatusNotFound, utils.Error("not found experience"))
 		return
 	}
 
-	c.JSON(http.StatusOK, experience)
+	c.JSON(http.StatusOK, utils.Success(experience, "Experience fetched successfully"))
 }
