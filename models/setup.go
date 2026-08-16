@@ -33,13 +33,13 @@ type Project struct {
 	Description   string     `json:"description"`
 	CoverImageURL string     `json:"coverImageURL"`
 	GithubURL     string     `json:"githubURL"`
-	IsFeatured     bool      `gorm:"default:false" json:"isFeatured"`
+	IsFeatured    bool       `gorm:"default:false" json:"isFeatured"`
 	CreatedAt     time.Time  `json:"createdAt"`
-
 
 	Images       []ProjectImage `gorm:"foreignKey:ProjectID" json:"images"`
 	Technologies []Technology   `gorm:"many2many:project_technologies;" json:"technologies"`
 	Experience   *Experience    `gorm:"foreignKey:ExperienceID" json:"experience"`
+	Achievements []Achievement  `gorm:"foreignKey:ProjectID" json:"achievements"`
 }
 
 type ProjectImage struct {
@@ -89,18 +89,18 @@ type Contact struct {
 }
 
 type Achievement struct {
-	ID           uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
-	UserID       uuid.UUID  `gorm:"type:uuid;not null" json:"userID"`
-	
+	ID     uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	UserID uuid.UUID `gorm:"type:uuid;not null" json:"userID"`
+
 	Title        string     `json:"title"`
 	Category     string     `json:"category"`
 	DateAchieved time.Time  `json:"dateAchieved"`
-	ProjectID    *uuid.UUID `json:"projectID"`
+	ProjectID    *uuid.UUID `gorm:"type:uuid" json:"projectID"`
 }
 
 // ฟังก์ชันสั่ง Run Migration
 func MigrateDB(db *gorm.DB) {
-	
+
 	db.AutoMigrate(
 		&User{},
 		&Project{},
@@ -112,4 +112,3 @@ func MigrateDB(db *gorm.DB) {
 		&Achievement{},
 	)
 }
-

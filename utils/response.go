@@ -2,11 +2,11 @@ package utils
 
 import "github.com/gin-gonic/gin"
 
-func Success(data interface{}) gin.H {
+func Success(data interface{}, message string) gin.H {
 	return gin.H{
 		"success": true,
 		"data":    data,
-		"message": "",
+		"message": message,
 	}
 }
 

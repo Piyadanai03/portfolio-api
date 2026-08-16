@@ -6,9 +6,20 @@ import (
 
 	"github.com/Piyadanai03/portfolio-api/config"
 	"github.com/Piyadanai03/portfolio-api/models"
+	"github.com/Piyadanai03/portfolio-api/utils"
 	"github.com/gin-gonic/gin"
 )
 
+// GetAbout godoc
+// @Summary Get about data
+// @Description Get about data for the portfolio
+// @Tags Portfolio
+// @Accept json
+// @Produce json
+// @Success 200 {object} utils.Response
+// @Failure 404 {object} utils.Response
+// @Failure 500 {object} utils.Response
+// @Router /portfolio/about [get]
 func GetAbout(c *gin.Context) {
 	var user models.User
 	var achievements []models.Achievement
@@ -16,11 +27,10 @@ func GetAbout(c *gin.Context) {
 	ownerID := os.Getenv("USER_ID")
 
 	if ownerID == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "ระบบยังไม่ได้ตั้งค่า USER_ID ของเจ้าของเว็บ"})
+		c.JSON(http.StatusInternalServerError, utils.Error("not found ownerID"))
 		return
 	}
 
-	// Fetch user with all related data
 	if err := config.DB.
 		Preload("Experiences").
 		Preload("Studies").
@@ -28,20 +38,19 @@ func GetAbout(c *gin.Context) {
 		Preload("Projects").
 		Where("id = ?", ownerID).
 		First(&user).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบข้อมูลโปรไฟล์ของเจ้าของเว็บ"})
+		c.JSON(http.StatusNotFound, utils.Error("not found user data"))
 		return
 	}
 
-	// Fetch achievements for the user
 	if err := config.DB.
 		Where("user_id = ?", ownerID).
 		Find(&achievements).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถดึงข้อมูล achievements"})
+		c.JSON(http.StatusInternalServerError, utils.Error("not found achievements"))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, utils.Success(gin.H{
 		"user":         user,
 		"achievements": achievements,
-	})
+	}, "About data fetched successfully"))
 }

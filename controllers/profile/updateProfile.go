@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/Piyadanai03/portfolio-api/config"
 	"github.com/Piyadanai03/portfolio-api/models"
@@ -35,12 +36,12 @@ func UpdateProfile(c *gin.Context) {
 	// 🌟 1. รับค่า URL ที่พิมพ์มาจากฟอร์ม ถ้ามีค่าให้เอามาใช้ก่อน
 	profileImageURL := c.PostForm("profileImageURL")
 	if profileImageURL == "" {
-		profileImageURL = user.ProfileImageURL // ถ้าไม่ส่งมา ให้ใช้ค่าเดิมใน DB
+		profileImageURL = user.ProfileImageURL
 	}
 
 	resumeURL := c.PostForm("resumeURL")
 	if resumeURL == "" {
-		resumeURL = user.ResumeURL // ถ้าไม่ส่งมา ให้ใช้ค่าเดิมใน DB
+		resumeURL = user.ResumeURL
 	}
 
 	// 🌟 2. อัปโหลดรูปภาพ Profile (ถ้ามีไฟล์แนบมา จะทับ URL ด้านบนเสมอ)
@@ -84,12 +85,24 @@ func UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	// 5. จัดการข้อมูล Contacts ด้วย Transaction (โค้ดเดิมของคุณ)
+	// 🌟 5. จัดการข้อมูล Contacts และอัปโหลด Icon ขึ้น Cloudinary
 	if contactsJSON != "" {
 		var contacts []models.Contact
 		if err := json.Unmarshal([]byte(contactsJSON), &contacts); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "รูปแบบข้อมูล Contacts ไม่ถูกต้อง"})
 			return
+		}
+
+		// ตรวจสอบและอัปโหลดรูป Icon ที่เป็น Base64 ขึ้น Cloudinary
+		for i := range contacts {
+			if strings.HasPrefix(contacts[i].IconURL, "data:image") {
+				uploadedURL, uploadErr := utils.UploadToCloudinary(contacts[i].IconURL, "portfolio_contact_icons")
+				if uploadErr == nil {
+					contacts[i].IconURL = uploadedURL
+				} else {
+					fmt.Println("⚠️ Failed to upload contact icon:", uploadErr)
+				}
+			}
 		}
 
 		err := config.DB.Transaction(func(tx *gorm.DB) error {
