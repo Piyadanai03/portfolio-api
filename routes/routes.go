@@ -39,6 +39,11 @@ func SetupRouter() *gin.Engine {
 		AllowCredentials: true,
 	}))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
 	v1 := r.Group("/api/v1")
 
 	v1.GET("/projects", projects.GetProjects)
