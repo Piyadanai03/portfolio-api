@@ -35,7 +35,15 @@ func GetHomeData(c *gin.Context) {
 		return
 	}
 
-	if err := config.DB.Where("user_id = ? AND is_featured = true", ownerID).Limit(3).Find(&user.Projects).Error; err != nil {
+	if err := config.DB.
+		Preload("Images").
+		Preload("Technologies").
+		Preload("Experience").
+		Preload("Achievements").
+		Where("user_id = ? AND is_featured = true", ownerID).
+		Limit(3).
+		Find(&user.Projects).Error; err != nil {
+
 		c.JSON(http.StatusInternalServerError, utils.Error("failed to fetch featured projects"))
 		return
 	}
